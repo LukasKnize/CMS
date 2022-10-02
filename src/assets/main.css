@@ -18,3 +18,7 @@ a{
     color: #2980b9;
   }
 }
+
+button{
+  cursor: pointer;
+}

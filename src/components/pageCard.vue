@@ -1,7 +1,7 @@
 <template>
     <div class="card">
         <div class="pageContent">
-            <h2>{{ props.title }}</h2>
+            <h2>{{ title }}</h2>
             <p>{{ desc }}</p>
             <a :href="'https://' + url">{{ url }}</a>
         </div>
@@ -19,9 +19,9 @@
 
 <script setup>
 const props = defineProps({
-    title: { type: String, default: "no" },
-    desc: { type: String, default: "no no" },
-    url: { type: String, default: "www.no" },
+    title: { type: String, default: "" },
+    desc: { type: String, default: "" },
+    url: { type: String, default: "" },
 });
 </script>
 
