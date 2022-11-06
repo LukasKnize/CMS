@@ -1,0 +1,20 @@
+{
+  "name": "justtest",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@quasar/extras": "^1.15.5",
+    "quasar": "^2.10.0",
+    "vue": "^3.2.41"
+  },
+  "devDependencies": {
+    "@quasar/vite-plugin": "^1.2.3",
+    "@vitejs/plugin-vue": "^3.1.2",
+    "sass": "^1.32.12",
+    "vite": "^3.1.8"
+  }
+}
