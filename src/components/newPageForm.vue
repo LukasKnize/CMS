@@ -37,7 +37,7 @@ const store = useListOfPagesStore();
 const settingsStore = useSettingsStore();
 const langStore = useLangStore();
 
-if (settingsStore.language == "cz") {
+if (settingsStore.language == "cs") {
     texts.h2 = langStore.cz.addNewpage.h2
     texts.title = langStore.cz.addNewpage.title
     texts.desc = langStore.cz.addNewpage.desc

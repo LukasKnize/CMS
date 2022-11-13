@@ -5,7 +5,9 @@ export const useSettingsStore = defineStore("settings", {
         return{
             mode: "light",
             language: "en",
-            whiteList: ["www.google.com", "www.docs.google.com"]
+            whiteList: ["www.google.com", "www.docs.google.com"],
+            token: ""
         }
-    }
+    },
+    persist: true
 })

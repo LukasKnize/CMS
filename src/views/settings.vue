@@ -1,36 +1,26 @@
 <template>
-    <div class="app">
-        <h2>{{ texts.h2 }}</h2>
-        <ul>
-            <li>
-                <p>{{ texts.mode }}</p>
-                <input
-                    type="checkbox"
-                    id="switch"
-                    v-model="settingsData.mode"
-                /><label for="switch" tabindex="0">Toggle</label>
-            </li>
-            <li>
-                <p>{{ texts.lang }}</p>
-                <select v-model="settingsData.language">
-                    <option value="en">English</option>
-                    <option value="cz">Čeština</option>
-                </select>
-            </li>
-            <li class="block">
-                <p class="small">{{ texts.whiteL }}</p>
-                <input type="text" />
-                <button class="md">{{ texts.addButton }}</button>
-                <ListItem
-                    v-for="(url, index) in urls"
-                    :key="index"
-                    :url="url"
-                />
-            </li>
-            <li>
-                <button @click="saveSettings()">{{ texts.saveButton }}</button>
-            </li>
-        </ul>
+            <div class="container">
+        <q-select filled v-model="settingsData.language" :options="options" label="Language" :bg-color="colors.qgrey"
+                :color="colors.qtext"
+                :label-color="colors.qtext" />
+
+        <q-toggle label="Dark mode" v-model="settingsData.mode" :bg-color="colors.qgrey"
+                :color="colors.qtext"
+                :label-color="colors.qtext" />
+
+        <q-input
+            filled
+            v-model="name"
+            label="White listed domains"
+            lazy-rules
+            :rules="[
+                (val) => (val && val.length > 0) || 'Please type something',
+            ]"
+            :bg-color="colors.qgrey"
+                :color="colors.qtext"
+                :label-color="colors.qtext"
+        />
+        <q-btn :color="colors.qbase"  label="Add domain" style="margin-top: 20px" />
     </div>
 </template>
 
@@ -39,16 +29,72 @@ import { useSettingsStore } from "@/stores/settingsPre.js";
 import { useLangStore } from "@/stores/lang.js";
 import { useColorStore } from "@/stores/colorPalete.js";
 import ListItem from "../components/ListItem.vue";
-import { reactive } from "vue";
-const settingsData = reactive({
-    mode: "",
+import { reactive, computed } from "vue";
+let settingsData = reactive({
+    mode: true,
     language: "en",
 });
 
-const urls = [];
-let settingsStore = useSettingsStore();
+let urls = [];
 let langStore = useLangStore();
+
+let settingsStore = useSettingsStore();
 let colorStore = useColorStore();
+
+let colors = computed(() => {
+    colorStore = useColorStore();
+    settingsStore = useSettingsStore();
+    if (settingsStore.mode == "Dark") {
+        return {
+            base: colorStore.dark.base,
+            gray: colorStore.dark.gray,
+            color: colorStore.dark.color,
+            darkColor: colorStore.dark.darkColor,
+            text: colorStore.dark.text,
+            qbase: colorStore.dark.qbase,
+            qtext: colorStore.dark.qtext,
+            qgrey: colorStore.dark.qgrey,
+            qcolor: colorStore.dark.qcolor,
+            qdarkcolor: colorStore.dark.qdarkColor
+        };
+    } else if (settingsStore.mode == "Light") {
+        return {
+            base: colorStore.light.base,
+            gray: colorStore.light.gray,
+            color: colorStore.light.color,
+            qcolor: colorStore.light.qcolor,
+            darkColor: colorStore.light.darkColor,
+            text: colorStore.light.text,
+            qbase: colorStore.light.qbase,
+            qtext: colorStore.light.qtext,
+            qgrey: colorStore.light.qgrey,
+            qdarkcolor: colorStore.light.qdarkColor
+        };
+    }
+
+    return {
+        qbase: "blue",
+        base: "#ecf0f1",
+        gray: "#bdc3c7",
+        qgrey: "grey-3",
+        color: "#3498db",
+        darkColor: "#2980b9",
+        text: "#000000",
+        qtext: "dark",
+        qcolor: "blue-10",
+        qdarkcolor: "dark"
+    };
+});
+
+if (settingsStore.mode == "Dark") {
+    settingsData.mode = true;
+}else{
+    settingsData.mode = false;
+}
+
+settingsData.language = settingsStore.language;
+
+urls = settingsStore.whiteList;
 
 let texts = reactive({
     h2: "Settings",
@@ -59,32 +105,8 @@ let texts = reactive({
     saveButton: "Save",
 });
 
-let colors = reactive({
-    base: "#ecf0f1",
-    gray: "#bdc3c7",
-    color: "#3498db",
-    darkColor: "#2980b9",
-    text: "#000000"
-});
-
-function loadColors() {
-    if (settingsStore.mode == "Dark") {
-        colors.base = colorStore.dark.base;
-        colors.gray = colorStore.dark.gray;
-        colors.color = colorStore.dark.color;
-        colors.darkColor = colorStore.dark.darkColor;
-        colors.text = colorStore.dark.text;
-    } else if (settingsStore.mode == "Light") {
-        colors.base = colorStore.light.base;
-        colors.gray = colorStore.light.gray;
-        colors.color = colorStore.light.color;
-        colors.darkColor = colorStore.light.darkColor;
-        colors.text = colorStore.light.text;
-    }
-}
-
 function loadLanguage() {
-    if (settingsStore.language == "cz") {
+    if (settingsStore.language == "cs") {
         texts.h2 = langStore.cz.settings.h2;
         texts.mode = langStore.cz.settings.mode;
         texts.lang = langStore.cz.settings.language;
@@ -100,22 +122,20 @@ function loadLanguage() {
         texts.saveButton = langStore.en.settings.saveButton;
     }
 }
-loadColors();
 loadLanguage();
 
 function saveSettings() {
-    let mode = ""
-    if(settingsData.mode){
-        mode = "Dark"
-    }else{
-        mode = "Light"
+    let mode = "";
+    if (settingsData.mode) {
+        mode = "Dark";
+    } else {
+        mode = "Light";
     }
     settingsStore.$patch((state) => {
-        (state.mode = mode),
-        (state.language = settingsData.language);
+        (state.mode = mode), (state.language = settingsData.language);
     });
 
-    console.log(settingsStore.mode)
+    console.log(settingsStore.mode);
 
     settingsStore = useSettingsStore();
     colorStore = useColorStore();
@@ -126,118 +146,10 @@ function saveSettings() {
 
 <style scoped>
 /* I used switch from this codePen: https://codepen.io/mburnette/pen/LxNxNg */
-.app {
-    padding-top: 60px;
-    width: 300px;
+.container{
+    padding-top: 50px;
+    width: 500px;
     margin-left: auto;
     margin-right: auto;
-}
-input[type="checkbox"] {
-    height: 0;
-    width: 0;
-    visibility: hidden;
-}
-
-label {
-    cursor: pointer;
-    text-indent: -9999px;
-    width: 50px;
-    height: 24px;
-    background: #bdc3c7;
-    display: block;
-    border-radius: 100px;
-    position: relative;
-}
-
-label:after {
-    content: "";
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 20px;
-    height: 20px;
-    background: #ecf0f1;
-    border-radius: 90px;
-    transition: 0.3s;
-}
-
-input:checked + label {
-    background: #9b59b6;
-}
-
-input:checked + label:after {
-    left: calc(100% - 2px);
-    transform: translateX(-100%);
-}
-
-label:active:after {
-    width: 30px;
-}
-
-p {
-    color: v-bind("colors.text");
-}
-
-h2 {
-    padding-left: 25px;
-    color: v-bind("colors.text");
-}
-
-ul {
-    padding-left: 25px;
-    padding-right: 25px;
-}
-
-li {
-    display: flex;
-    justify-content: space-between;
-    padding-bottom: 15px;
-}
-
-.block {
-    display: block;
-}
-
-.small {
-    font-size: 0.8em;
-}
-
-select {
-    background-color: v-bind("colors.base");
-    color: v-bind("colors.text");
-    border: none;
-}
-
-input[type="text"] {
-    width: 250px;
-    margin: 15px 0;
-    height: 35px;
-    background-color: v-bind("colors.base");
-    border: v-bind("colors.gray") 2px solid;
-    border-radius: 5px;
-    color: v-bind("colors.text");
-}
-
-input[type="text"]:focus {
-    border: v-bind("colors.color") 2px solid;
-    outline: none;
-}
-
-button {
-    width: 250px;
-    background-color: v-bind("colors.color");
-    border: none;
-    color: #ecf0f1;
-    font-weight: 700;
-    height: 35px;
-    border-radius: 5px;
-}
-
-button:hover {
-    background-color: v-bind("colors.darkColor");
-}
-
-.md {
-    margin-bottom: 15px;
 }
 </style>

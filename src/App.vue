@@ -1,12 +1,70 @@
 <script setup>
-import { RouterLink, RouterView } from "vue-router";
 import { computed } from "vue";
 import { useColorStore } from "@/stores/colorPalete.js";
 import { useSettingsStore } from "@/stores/settingsPre.js";
+import { useUserStore } from "@/stores/user.js";
+import router from "@/router";
+import { reactive, ref } from "@vue/reactivity";
+import { onMounted } from "@vue/runtime-core";
+
+let menu = ref(null);
+let comp = reactive({ component: "" });
+onMounted(() => {
+    menu = menu.value;
+});
+
+function menuToggle() {
+    menu.classList.toggle("menuOpened");
+}
+
+let userStore = useUserStore();
+let colorStore = useColorStore();
+let settingsStore = useSettingsStore();
+
+if (userStore.user.length == 0) {
+    router.push("signUp");
+} else if (settingsStore.token == "") {
+    router.push("logIn");
+}
+
+function changePages(p) {
+    if (p == "myPages") {
+        router.push("pages");
+    } else if (p == "addPage") {
+        router.push("newPage");
+    } else if (p == "templates") {
+        router.push("templates");
+    } else if (p == "plugins") {
+        router.push("plugins");
+    } else if (p == "settings") {
+        router.push("settings");
+    } else if (p == "login") {
+        router.push("logIn");
+    }
+}
+
+if (
+    window.matchMedia &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+) {
+    settingsStore.$patch((state) => {
+        state.mode = "Dark";
+    });
+}
+
+if ((navigator.language || navigator.userLanguage) == "cs") {
+    settingsStore.$patch((state) => {
+        state.language = "cs";
+    });
+} else {
+    settingsStore.$patch((state) => {
+        state.language = "en";
+    });
+}
 
 let colors = computed(() => {
-    let colorStore = useColorStore();
-    let settingsStore = useSettingsStore();
+    colorStore = useColorStore();
+    settingsStore = useSettingsStore();
     if (settingsStore.mode == "Dark") {
         return {
             base: colorStore.dark.base,
@@ -14,121 +72,243 @@ let colors = computed(() => {
             color: colorStore.dark.color,
             darkColor: colorStore.dark.darkColor,
             text: colorStore.dark.text,
+            qbase: colorStore.dark.qbase,
+            qtext: colorStore.dark.qtext,
+            qgrey: colorStore.dark.qgrey,
+            qcolor: colorStore.dark.qcolor,
+            qdarkcolor: colorStore.dark.qdarkColor
         };
     } else if (settingsStore.mode == "Light") {
         return {
             base: colorStore.light.base,
             gray: colorStore.light.gray,
             color: colorStore.light.color,
+            qcolor: colorStore.light.qcolor,
             darkColor: colorStore.light.darkColor,
             text: colorStore.light.text,
+            qbase: colorStore.light.qbase,
+            qtext: colorStore.light.qtext,
+            qgrey: colorStore.light.qgrey,
+            qdarkcolor: colorStore.light.qdarkColor
         };
     }
 
     return {
+        qbase: "blue",
         base: "#ecf0f1",
         gray: "#bdc3c7",
+        qgrey: "grey-3",
         color: "#3498db",
         darkColor: "#2980b9",
         text: "#000000",
+        qtext: "dark",
+        qcolor: "blue-10",
+        qdarkcolor: "dark"
     };
 });
 </script>
 
 <template>
-    <div class="app">
-        <header>
-            <img alt="Vue logo" class="logo" src="@/assets/logo.svg" />
-        </header>
+    <div :class="'bg-' + colors.qdarkcolor" class="container">
+        <q-layout
+            view="lHh lpr lFf"
+            container
+            style="height: 50px"
+            class="shadow-2"
+        >
+            <q-header elevated :class="'bg-' + colors.qbase">
+                <q-toolbar>
+                    <q-btn
+                        flat
+                        round
+                        dense
+                        icon="menu"
+                        class="q-mr-sm"
+                        @click="menuToggle"
+                    />
+                    <q-avatar>
+                        <img
+                            src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg"
+                        />
+                    </q-avatar>
 
-        <RouterView />
+                    <q-toolbar-title>WEBRANE</q-toolbar-title>
 
-        <nav>
-            <router-link to="/pages" tabindex="-1"
-                ><button class="navButton">
-                    <img
-                        src="./assets/allPages.svg"
-                        alt=""
-                        class="icon"
-                    /></button
-            ></router-link>
-            <router-link to="/newPage" tabindex="-1"
-                ><button class="navButton">
-                    <img
-                        src="./assets/addPage.svg"
-                        alt=""
-                        class="icon"
-                    /></button
-            ></router-link>
-            <router-link to="/settings">
-                <button class="navButton">
-                    <img src="./assets/settings.svg" alt="" class="icon" />
-                </button>
-            </router-link>
-        </nav>
+                    <q-btn
+                        flat
+                        round
+                        dense
+                        icon="account_circle"
+                        @click="changePages('login')"
+                    />
+                </q-toolbar>
+            </q-header>
+        </q-layout>
+        <div class="contentContainer">
+            <div
+                style="width: 250px; height: calc(100vh - 50px)"
+                class="sideMenuPanel"
+                ref="menu"
+            >
+                <q-list
+                    bordered
+                    padding
+                    class="text-primary sideMenu"
+                    :class="'bg-' + colors.qgrey"
+                >
+                    <div>
+                        <q-item
+                            clickable
+                            v-ripple
+                            @click="changePages('myPages')"
+                            active-class="my-menu-link"
+                        >
+                            <q-item-section avatar>
+                                <q-icon
+                                    name="library_books"
+                                    :class="'text-' + colors.qcolor"
+                                />
+                            </q-item-section>
+
+                            <q-item-section :class="'text-' + colors.qcolor"
+                                >My pages</q-item-section
+                            >
+                        </q-item>
+
+                        <q-item
+                            clickable
+                            v-ripple
+                            @click="changePages('addPage')"
+                            active-class="my-menu-link"
+                        >
+                            <q-item-section avatar>
+                                <q-icon
+                                    name="library_add"
+                                    :class="'text-' + colors.qcolor"
+                                />
+                            </q-item-section>
+
+                            <q-item-section :class="'text-' + colors.qcolor"
+                                >Add page</q-item-section
+                            >
+                        </q-item>
+
+                        <q-item
+                            clickable
+                            v-ripple
+                            @click="changePages('templates')"
+                            active-class="my-menu-link"
+                        >
+                            <q-item-section avatar>
+                                <q-icon
+                                    name="web"
+                                    :class="'text-' + colors.qcolor"
+                                />
+                            </q-item-section>
+
+                            <q-item-section :class="'text-' + colors.qcolor"
+                                >Templates</q-item-section
+                            >
+                        </q-item>
+
+                        <q-item
+                            clickable
+                            v-ripple
+                            @click="changePages('plugins')"
+                            active-class="my-menu-link"
+                        >
+                            <q-item-section avatar>
+                                <q-icon
+                                    name="extension"
+                                    :class="'text-' + colors.qcolor"
+                                />
+                            </q-item-section>
+
+                            <q-item-section :class="'text-' + colors.qcolor"
+                                >Plugins</q-item-section
+                            >
+                        </q-item>
+                    </div>
+
+                    <div>
+                        <q-separator spaced />
+                        <q-item
+                            clickable
+                            v-ripple
+                            @click="changePages('settings')"
+                            active-class="my-menu-link"
+                        >
+                            <q-item-section avatar>
+                                <q-icon
+                                    name="settings"
+                                    :class="'text-' + colors.qcolor"
+                                />
+                            </q-item-section>
+
+                            <q-item-section :class="'text-' + colors.qcolor"
+                                >Settings</q-item-section
+                            >
+                        </q-item>
+
+                        <q-item
+                            clickable
+                            v-ripple
+                            @click="link = 'help'"
+                            active-class="my-menu-link"
+                        >
+                            <q-item-section avatar>
+                                <q-icon
+                                    name="help"
+                                    :class="'text-' + colors.qcolor"
+                                />
+                            </q-item-section>
+
+                            <q-item-section :class="'text-' + colors.qcolor"
+                                >Help</q-item-section
+                            >
+                        </q-item>
+                    </div>
+                </q-list>
+            </div>
+            <RouterView />
+        </div>
     </div>
 </template>
 
 <style scoped>
-.app {
-    background-color: v-bind("colors.base");
-    position: relative;
-    min-height: 100vh;
-    width: 100%;
+.container{
+min-height: 100vh;
 }
 
-header {
-    width: 100%;
-    height: 50px;
-    border-bottom: v-bind("colors.gray") 1px solid;
-    position: fixed;
-    top: 0;
-    left: 0;
-    background-color: v-bind("colors.color");
+.sideMenuPanel {
+    display: none;
+}
+
+.menuOpened {
+    display: block;
+    animation: slideIn 0.6s ease-in-out forwards;
+}
+
+.sideMenu {
     display: flex;
-    align-items: center;
-    box-shadow: #34495e 0 0 10px;
-    z-index: 2;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    flex-shrink: 0;
 }
 
-header .logo {
-    width: 40px;
-    padding-left: 15px;
-}
-
-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
+.contentContainer {
     width: 100%;
-    height: 70px;
     display: flex;
-    justify-content: space-evenly;
-    align-items: center;
-    background-color: v-bind("colors.color");
-    filter: drop-shadow(0px 0px 6px #34495e);
-    border-top-left-radius: 25px;
-    border-top-right-radius: 25px;
-    z-index: 2;
 }
 
-.navButton {
-    width: 42px;
-    height: 42px;
-    border-radius: 21px;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    filter: drop-shadow(0px 0px 2px #7f8c8d);
-    background-color: v-bind("colors.base");
-}
+@keyframes slideIn {
+    from {
+        margin-left: -250px;
+    }
 
-.navButton:hover {
-    filter: drop-shadow(0px 0px 4px #bdc3c7);
-}
-
-.icon {
-    width: 30px;
+    to {
+        margin-left: 0;
+    }
 }
 </style>
