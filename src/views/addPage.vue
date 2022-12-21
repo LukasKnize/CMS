@@ -119,10 +119,16 @@ let options = ['Google', 'Facebook', 'Twitter', 'Apple', 'Oracle']
 
 <style scoped>
 .container{
-    padding-top: 50px;
+    padding-top: 100px;
     width: 500px;
     margin-left: auto;
     margin-right: auto;
+}
+
+@media(max-width: 550px){
+    .container{
+      width: calc(100% - 40px);
+    }
 }
 </style>
 

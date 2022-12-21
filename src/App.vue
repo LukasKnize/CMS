@@ -8,13 +8,16 @@ import { reactive, ref } from "@vue/reactivity";
 import { onMounted } from "@vue/runtime-core";
 
 let menu = ref(null);
+let animComponent = ref(null);
 let comp = reactive({ component: "" });
 onMounted(() => {
     menu = menu.value;
+    animComponent = animComponent.value;
 });
 
 function menuToggle() {
     menu.classList.toggle("menuOpened");
+    animComponent.classList.toggle("openAnim");
 }
 
 let userStore = useUserStore();
@@ -40,6 +43,8 @@ function changePages(p) {
         router.push("settings");
     } else if (p == "login") {
         router.push("logIn");
+    }else if(p == "signup"){
+        router.push("signUp")
     }
 }
 
@@ -76,7 +81,7 @@ let colors = computed(() => {
             qtext: colorStore.dark.qtext,
             qgrey: colorStore.dark.qgrey,
             qcolor: colorStore.dark.qcolor,
-            qdarkcolor: colorStore.dark.qdarkColor
+            qdarkcolor: colorStore.dark.qdarkColor,
         };
     } else if (settingsStore.mode == "Light") {
         return {
@@ -89,7 +94,7 @@ let colors = computed(() => {
             qbase: colorStore.light.qbase,
             qtext: colorStore.light.qtext,
             qgrey: colorStore.light.qgrey,
-            qdarkcolor: colorStore.light.qdarkColor
+            qdarkcolor: colorStore.light.qdarkColor,
         };
     }
 
@@ -103,7 +108,7 @@ let colors = computed(() => {
         text: "#000000",
         qtext: "dark",
         qcolor: "blue-10",
-        qdarkcolor: "dark"
+        qdarkcolor: "dark",
     };
 });
 </script>
@@ -126,11 +131,13 @@ let colors = computed(() => {
                         class="q-mr-sm"
                         @click="menuToggle"
                     />
+                    <router-link to="/">
                     <q-avatar>
                         <img
                             src="https://cdn.quasar.dev/logo-v2/svg/logo-mono-white.svg"
                         />
                     </q-avatar>
+                    </router-link>
 
                     <q-toolbar-title>WEBRANE</q-toolbar-title>
 
@@ -145,130 +152,132 @@ let colors = computed(() => {
             </q-header>
         </q-layout>
         <div class="contentContainer">
-            <div
-                style="width: 250px; height: calc(100vh - 50px)"
-                class="sideMenuPanel"
-                ref="menu"
-            >
-                <q-list
-                    bordered
-                    padding
-                    class="text-primary sideMenu"
-                    :class="'bg-' + colors.qgrey"
-                >
-                    <div>
-                        <q-item
-                            clickable
-                            v-ripple
-                            @click="changePages('myPages')"
-                            active-class="my-menu-link"
-                        >
-                            <q-item-section avatar>
-                                <q-icon
-                                    name="library_books"
-                                    :class="'text-' + colors.qcolor"
-                                />
-                            </q-item-section>
-
-                            <q-item-section :class="'text-' + colors.qcolor"
-                                >My pages</q-item-section
+            <div class="sideMenuPanelBackdrop" ref="menu" @click="menuToggle">
+                <div
+                    style="width: 250px; height: calc(100vh - 50px)"
+                    class="sideMenuPanel"
+                    ref="animComponent"
+                    >
+                    <q-list
+                        bordered
+                        padding
+                        class="text-primary sideMenu"
+                        :class="'bg-' + colors.qgrey"
+                    >
+                        <div>
+                            <q-item
+                                clickable
+                                v-ripple
+                                @click="changePages('myPages')"
+                                active-class="my-menu-link"
                             >
-                        </q-item>
+                                <q-item-section avatar>
+                                    <q-icon
+                                        name="library_books"
+                                        :class="'text-' + colors.qcolor"
+                                    />
+                                </q-item-section>
 
-                        <q-item
-                            clickable
-                            v-ripple
-                            @click="changePages('addPage')"
-                            active-class="my-menu-link"
-                        >
-                            <q-item-section avatar>
-                                <q-icon
-                                    name="library_add"
-                                    :class="'text-' + colors.qcolor"
-                                />
-                            </q-item-section>
+                                <q-item-section :class="'text-' + colors.qcolor"
+                                    >My pages</q-item-section
+                                >
+                            </q-item>
 
-                            <q-item-section :class="'text-' + colors.qcolor"
-                                >Add page</q-item-section
+                            <q-item
+                                clickable
+                                v-ripple
+                                @click="changePages('addPage')"
+                                active-class="my-menu-link"
                             >
-                        </q-item>
+                                <q-item-section avatar>
+                                    <q-icon
+                                        name="library_add"
+                                        :class="'text-' + colors.qcolor"
+                                    />
+                                </q-item-section>
 
-                        <q-item
-                            clickable
-                            v-ripple
-                            @click="changePages('templates')"
-                            active-class="my-menu-link"
-                        >
-                            <q-item-section avatar>
-                                <q-icon
-                                    name="web"
-                                    :class="'text-' + colors.qcolor"
-                                />
-                            </q-item-section>
+                                <q-item-section :class="'text-' + colors.qcolor"
+                                    >Add page</q-item-section
+                                >
+                            </q-item>
 
-                            <q-item-section :class="'text-' + colors.qcolor"
-                                >Templates</q-item-section
+                            <q-item
+                                clickable
+                                v-ripple
+                                @click="changePages('templates')"
+                                active-class="my-menu-link"
                             >
-                        </q-item>
+                                <q-item-section avatar>
+                                    <q-icon
+                                        name="web"
+                                        :class="'text-' + colors.qcolor"
+                                    />
+                                </q-item-section>
 
-                        <q-item
-                            clickable
-                            v-ripple
-                            @click="changePages('plugins')"
-                            active-class="my-menu-link"
-                        >
-                            <q-item-section avatar>
-                                <q-icon
-                                    name="extension"
-                                    :class="'text-' + colors.qcolor"
-                                />
-                            </q-item-section>
+                                <q-item-section :class="'text-' + colors.qcolor"
+                                    >Templates</q-item-section
+                                >
+                            </q-item>
 
-                            <q-item-section :class="'text-' + colors.qcolor"
-                                >Plugins</q-item-section
+                            <q-item
+                                clickable
+                                v-ripple
+                                @click="changePages('plugins')"
+                                active-class="my-menu-link"
                             >
-                        </q-item>
-                    </div>
+                                <q-item-section avatar>
+                                    <q-icon
+                                        name="extension"
+                                        :class="'text-' + colors.qcolor"
+                                    />
+                                </q-item-section>
 
-                    <div>
-                        <q-separator spaced />
-                        <q-item
-                            clickable
-                            v-ripple
-                            @click="changePages('settings')"
-                            active-class="my-menu-link"
-                        >
-                            <q-item-section avatar>
-                                <q-icon
-                                    name="settings"
-                                    :class="'text-' + colors.qcolor"
-                                />
-                            </q-item-section>
+                                <q-item-section :class="'text-' + colors.qcolor"
+                                    >Plugins</q-item-section
+                                >
+                            </q-item>
+                        </div>
 
-                            <q-item-section :class="'text-' + colors.qcolor"
-                                >Settings</q-item-section
+                        <div>
+                            <q-separator spaced />
+                            <q-item
+                                clickable
+                                v-ripple
+                                @click="changePages('settings')"
+                                active-class="my-menu-link"
                             >
-                        </q-item>
+                                <q-item-section avatar>
+                                    <q-icon
+                                        name="settings"
+                                        :class="'text-' + colors.qcolor"
+                                    />
+                                </q-item-section>
 
-                        <q-item
-                            clickable
-                            v-ripple
-                            @click="link = 'help'"
-                            active-class="my-menu-link"
-                        >
-                            <q-item-section avatar>
-                                <q-icon
-                                    name="help"
-                                    :class="'text-' + colors.qcolor"
-                                />
-                            </q-item-section>
+                                <q-item-section :class="'text-' + colors.qcolor"
+                                    >Settings</q-item-section
+                                >
+                            </q-item>
 
-                            <q-item-section :class="'text-' + colors.qcolor"
-                                >Help</q-item-section
+                            <q-item
+                                clickable
+                                v-ripple
+                                @click="changePages('signup')"
+                                active-class="my-menu-link"
                             >
-                        </q-item>
-                    </div>
-                </q-list>
+                                <q-item-section avatar>
+                                    <q-icon
+                                        name="help"
+                                        :class="'text-' + colors.qcolor"
+                                    />
+                                </q-item-section>
+
+                                <q-item-section :class="'text-' + colors.qcolor"
+                                    >Help</q-item-section
+                                >
+                            </q-item>
+                        </div>
+                    </q-list>
+                </div>
             </div>
             <RouterView />
         </div>
@@ -276,17 +285,26 @@ let colors = computed(() => {
 </template>
 
 <style scoped>
-.container{
-min-height: 100vh;
+.container {
+    min-height: 100vh;
 }
 
-.sideMenuPanel {
+.sideMenuPanelBackdrop {
     display: none;
+    position: fixed;
+    top: 50px;
+    left: 0;
+    z-index: 500;
+    background: rgba(0, 0, 0, 0.712);
+    width: 100%;
 }
 
 .menuOpened {
-    display: block;
-    animation: slideIn 0.6s ease-in-out forwards;
+    display: block !important;
+}
+
+.openAnim{
+animation: slideIn 0.6s ease-in-out forwards;
 }
 
 .sideMenu {
@@ -310,5 +328,12 @@ min-height: 100vh;
     to {
         margin-left: 0;
     }
+}
+
+.q-layout-container {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 500;
 }
 </style>

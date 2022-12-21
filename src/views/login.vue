@@ -7,7 +7,8 @@
                 label="Email*"
                 lazy-rules
                 :rules="[
-                    (val) => (val && val.length > 0) || 'Please type your email',
+                    (val) =>
+                        (val && val.length > 0) || 'Please type your email',
                 ]"
                 :bg-color="colors.qgrey"
                 :color="colors.qtext"
@@ -22,7 +23,8 @@
                 lazy-rules
                 :rules="[
                     (val) =>
-                        (val !== null && val !== '') || 'Please type your password'
+                        (val !== null && val !== '') ||
+                        'Please type your password',
                 ]"
                 :bg-color="colors.qgrey"
                 :color="colors.qtext"
@@ -36,19 +38,17 @@
             />
 
             <div>
-                <q-btn label="Submit" type="submit" :color="colors.qbase" />
+                <q-btn label="Submit" type="submit" :color="colors.qbase" @click="login" />
             </div>
         </q-form>
     </div>
 </template>
 
 <script setup>
-import { useUserStore } from "@/stores/user.js";
 import { useSettingsStore } from "@/stores/settingsPre.js";
 import { reactive, computed } from "@vue/reactivity";
 import { useColorStore } from "@/stores/colorPalete.js";
 
-let userStore = useUserStore();
 let settingsStore = useSettingsStore();
 let colorStore = useColorStore();
 
@@ -66,7 +66,7 @@ let colors = computed(() => {
             qtext: colorStore.dark.qtext,
             qgrey: colorStore.dark.qgrey,
             qcolor: colorStore.dark.qcolor,
-            qdarkcolor: colorStore.dark.qdarkColor
+            qdarkcolor: colorStore.dark.qdarkColor,
         };
     } else if (settingsStore.mode == "Light") {
         return {
@@ -79,7 +79,7 @@ let colors = computed(() => {
             qbase: colorStore.light.qbase,
             qtext: colorStore.light.qtext,
             qgrey: colorStore.light.qgrey,
-            qdarkcolor: colorStore.light.qdarkColor
+            qdarkcolor: colorStore.light.qdarkColor,
         };
     }
 
@@ -93,114 +93,50 @@ let colors = computed(() => {
         text: "#000000",
         qtext: "dark",
         qcolor: "blue-10",
-        qdarkcolor: "dark"
+        qdarkcolor: "dark",
     };
 });
 
 let loginData = reactive({
     email: "",
     password: "",
-    save: false
+    save: false,
 });
 
-async function onSubmit(e) {
-    e.pre
-    let salt = "";
-    let userIndex = "";
-    for (let i = 0; i < userStore.user.length; i++) {
-        if (userStore.user[i].email == loginData.email) {
-            salt = userStore.user[i].salt;
-            userIndex = i;
-            break;
-        }
-    }
+async function login(e) {
+    e.preventDefault();
+    let data = {
+        email: loginData.email,
+        password: loginData.password,
+    };
+    const resp = fetch("http://localhost:5500/auth/logIn/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+    });
 
-    if (salt != "") {
-        if (await checkPassword(salt, loginData.password, userIndex)) {
-            let token = generateToken();
-            settingsStore.$patch((state) => {
-                state.token = token;
-            });
-
-            useUserStore.$patch((state) => {
-                state.user[userIndex].token.push(token);
-            });
-        }
-    } else {
-        //error
-    }
-}
-
-async function checkPassword(salt, pass, userIndex) {
-    let peperArray = [
-        "A",
-        "B",
-        "C",
-        "D",
-        "E",
-        "F",
-        "G",
-        "H",
-        "I",
-        "J",
-        "K",
-        "L",
-        "M",
-        "N",
-        "O",
-        "P",
-        "Q",
-        "R",
-        "S",
-        "T",
-        "U",
-        "V",
-        "W",
-        "X",
-        "Y",
-        "Z",
-    ];
-
-    for (let i = 0; i < peperArray.length; i++) {
-        const encoder = new TextEncoder();
-        let fullPass = pass + salt + peperArray[i];
-        const data = encoder.encode(fullPass);
-        const hash = await crypto.subtle.digest("SHA-256", data);
-        let hpass = Array.prototype.map
-            .call(new Uint8Array(hash), (x) =>
-                ("00" + x.toString(16)).slice(-2)
-            )
-            .join("");
-        if (userStore.user[userIndex].pass == JSON.stringify(hpass)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-function generateToken() {
-    let tokenCharSet =
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let token = "";
-    for (let i = 0; i < 32; i++) {
-        token += tokenCharSet.charAt(
-            Math.floor(Math.random() * tokenCharSet.length)
-        );
-    }
-    return token;
+    console.log(await resp);
 }
 </script>
 <style scoped>
 .Container {
-    padding-top: 50px;
+    padding-top: 100px;
     width: 500px;
     margin-left: auto;
     margin-right: auto;
 }
+
+@media (max-width: 550px) {
+    .Container {
+        width: calc(100% - 40px);
+    }
+}
 </style>
 
 <style>
-input{
+input {
     color: v-bind("colors.text") !important;
 }
 </style>

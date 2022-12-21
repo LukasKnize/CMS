@@ -1,5 +1,5 @@
 <template>
-    <div class="pageContainer">
+    <div class="Container">
         <q-card class="my-card" :class="'bg-' + colors.qgrey + ' ' + 'text-' + colors.qtext">
       <q-card-section>
         <div class="text-h6">Our Changing Planet</div>
@@ -139,13 +139,13 @@ let colors = computed(() => {
 
 
 <style scoped>
-.pageContainer{
+.Container{
     display: flex;
     flex-wrap: wrap;
     width: calc(100% - 300px);
     padding-left: 25px;
     padding-right: 25px;
-    padding-top: 50px;
+    padding-top: 100px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -166,5 +166,22 @@ let colors = computed(() => {
 
 .addCard:hover{
   background-color: rgba(0, 0, 0, 0.105);
+}
+
+@media(max-width: 1000px){
+  .Container{
+    justify-content: center;
+  }
+}
+
+@media(max-width: 650px){
+  .Container{
+    width: 100%;
+  }
+
+  .my-card{
+    min-height: 300px;
+    height: auto;
+  }
 }
 </style>

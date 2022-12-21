@@ -91,7 +91,7 @@ let colors = computed(() => {
     width: calc(100% - 300px);
     padding-left: 25px;
     padding-right: 25px;
-    padding-top: 50px;
+    padding-top: 100px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -102,5 +102,18 @@ let colors = computed(() => {
   margin-left: 20px;
   margin-right: 20px;
   margin-bottom: 20px;
+}
+
+
+@media(max-width: 1000px){
+  .Container{
+    justify-content: center;
+  }
+}
+
+@media(max-width: 650px){
+  .Container{
+    width: 100%;
+  }
 }
 </style>

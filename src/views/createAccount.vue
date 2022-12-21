@@ -1,43 +1,89 @@
 <template>
-    <div class="app">
-        <form onsubmit="event.preventDefault()">
-            <ul>
-                <li>
-                    <p>{{ texts.accountType }}</p>
-                    <select v-model="data.accountType">
-                        <option value="admin">Admin</option>
-                        <option value="editor">Editor</option>
-                    </select>
-                </li>
-                <li>
-                    <p>{{ texts.username }}</p>
-                    <input type="text" name="usename" v-model="data.username" />
-                </li>
-                <li>
-                    <p>email</p>
-                    <input type="email" name="email" v-model="data.email" />
-                </li>
-                <li>
-                    <p>{{ texts.password }}</p>
-                    <input type="password" name="pass" v-model="data.pass" />
-                </li>
-                <li>
-                    <p>{{ texts.passwordValidation }}</p>
-                    <input type="password" name="pass" v-model="data.passV" />
-                </li>
-            </ul>
-            <button @click="validateForm">Log in</button>
-        </form>
+    <div class="Container">
+        <q-form @submit="onSubmit" class="q-gutter-md">
+            <q-select
+                filled
+                v-model="data.accountType"
+                :options="accountTypes"
+                label="Type of account"
+                :bg-color="colors.qgrey"
+                :color="colors.qtext"
+                :label-color="colors.qtext"
+            />
+
+            <q-input
+                filled
+                v-model="data.email"
+                label="Email*"
+                lazy-rules
+                :rules="[
+                    (val) => emailValid(val) || 'This is not a valid email.',
+                ]"
+                :bg-color="colors.qgrey"
+                :color="colors.qtext"
+                :label-color="colors.qtext"
+            />
+
+            <q-input
+                filled
+                v-model="data.username"
+                label="UserName*"
+                lazy-rules
+                :rules="[
+                    (val) =>
+                        (val && val.length > 0) || 'Please type your username',
+                ]"
+                :bg-color="colors.qgrey"
+                :color="colors.qtext"
+                :label-color="colors.qtext"
+            />
+
+            <q-input
+                filled
+                type="password"
+                v-model="data.pass"
+                label="Password *"
+                lazy-rules
+                :rules="[
+                    (val) =>
+                        passValid(val) ||
+                        'Password must contain atleast 12 characters, capital letter and numbers.',
+                ]"
+                :bg-color="colors.qgrey"
+                :color="colors.qtext"
+                :label-color="colors.qtext"
+            />
+
+            <q-input
+                filled
+                type="password"
+                v-model="data.passV"
+                label="Password *"
+                lazy-rules
+                :rules="[
+                    (val) => val == data.pass || 'Passwords are different',
+                ]"
+                :bg-color="colors.qgrey"
+                :color="colors.qtext"
+                :label-color="colors.qtext"
+            />
+
+            <div>
+                <q-btn label="Submit" type="submit" :color="colors.qbase" @click="createUser" />
+            </div>
+        </q-form>
     </div>
 </template>
 
 <script setup>
-import { reactive } from "@vue/reactivity";
+import { reactive, computed } from "@vue/reactivity";
 import { useUserStore } from "@/stores/user.js";
 import { useSettingsStore } from "@/stores/settingsPre.js";
+import { useColorStore } from "@/stores/colorPalete.js";
 
 let userStore = useUserStore();
 let settingsStore = useSettingsStore();
+let colorStore = useColorStore();
 
 let texts = {
     accountType: "what kind of account you want to create:",
@@ -53,146 +99,123 @@ let data = reactive({
     email: "",
     pass: "",
     passV: "",
-    role: "",
     accountType: "",
 });
 
-let pasRegEx = new RegExp(/^((?=\S*?[A-Z])(?=\S*?[a-z])(?=\S*?[0-9]).{12,})\S$/);
+let accountTypes = ["admin", "editor"];
+
+let pasRegEx = new RegExp(
+    /^((?=\S*?[A-Z])(?=\S*?[a-z])(?=\S*?[0-9]).{12,})\S$/
+);
 let emRegEx = RegExp(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/);
-async function validateForm() {
-    if (data.username.length < 2) {
-        console.log("short user")
-    } else if (!emRegEx.test(data.email)) {
-        console.log("wrong email")
-    } else if (!pasRegEx.test(data.pass)) {
-        console.log("unsafe pass")
-    } else if (data.pass != data.passV) {
-        console.log("not mathing pass")
-    } else {
-        let passInfo = await hashPassword(data.pass);
-        let token = generateToken();
-        userStore.$patch((state) => {
-            state.user.push({
-                username: data.username,
-                email: data.email,
-                pass: passInfo.pass,
-                salt: passInfo.salt,
-                token: [token],
-                accountType: data.accountType,
-            });
+
+function passValid(p) {
+    return pasRegEx.test(p);
+}
+
+function emailValid(p) {
+    return emRegEx.test(p);
+}
+
+async function createUser(e) {
+    e.preventDefault()
+    if (
+        data.username != "" &&
+        emailValid(data.email) &&
+        data.accountType != "" &&
+        passValid(data.pass) &&
+        data.pass == data.passV
+    ) {
+        let userData = {
+            username: data.username,
+            email: data.email,
+            type: data.accountType,
+            password: data.pass,
+        };
+        const resp = fetch("http://localhost:5500/auth/signUp/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(userData),
         });
-        settingsStore.$patch((state) => {
-                state.token = token;
-            });
-        console.log(userStore);
+
+        console.log(await resp)
     }
 }
 
-async function hashPassword(pass) {
-    let saltCharSet =
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let salt = "";
-    for (let i = 0; i < 32; i++) {
-        salt += saltCharSet.charAt(
-            Math.floor(Math.random() * saltCharSet.length)
-        );
+let colors = computed(() => {
+    colorStore = useColorStore();
+    settingsStore = useSettingsStore();
+    if (settingsStore.mode == "Dark") {
+        return {
+            base: colorStore.dark.base,
+            gray: colorStore.dark.gray,
+            color: colorStore.dark.color,
+            darkColor: colorStore.dark.darkColor,
+            text: colorStore.dark.text,
+            qbase: colorStore.dark.qbase,
+            qtext: colorStore.dark.qtext,
+            qgrey: colorStore.dark.qgrey,
+            qcolor: colorStore.dark.qcolor,
+            qdarkcolor: colorStore.dark.qdarkColor,
+        };
+    } else if (settingsStore.mode == "Light") {
+        return {
+            base: colorStore.light.base,
+            gray: colorStore.light.gray,
+            color: colorStore.light.color,
+            qcolor: colorStore.light.qcolor,
+            darkColor: colorStore.light.darkColor,
+            text: colorStore.light.text,
+            qbase: colorStore.light.qbase,
+            qtext: colorStore.light.qtext,
+            qgrey: colorStore.light.qgrey,
+            qdarkcolor: colorStore.light.qdarkColor,
+        };
     }
 
-    let peperArray = [
-        "A",
-        "B",
-        "C",
-        "D",
-        "E",
-        "F",
-        "G",
-        "H",
-        "I",
-        "J",
-        "K",
-        "L",
-        "M",
-        "N",
-        "O",
-        "P",
-        "Q",
-        "R",
-        "S",
-        "T",
-        "U",
-        "V",
-        "W",
-        "X",
-        "Y",
-        "Z",
-    ];
-    let peper = peperArray[Math.floor(Math.random() * peperArray.length)];
-    const encoder = new TextEncoder();
-    let fullPass = pass + salt + peper;
-    const data = encoder.encode(fullPass);
-    const hash = await crypto.subtle.digest("SHA-256", data);
-    let hpass = Array.prototype.map.call(new Uint8Array(hash), x => ('00' + x.toString(16)).slice(-2)).join('');
-    return { pass: JSON.stringify(hpass), salt: salt };
-}
-
-function generateToken() {
-    let tokenCharSet =
-        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let token = "";
-    for (let i = 0; i < 32; i++) {
-        token += tokenCharSet.charAt(
-            Math.floor(Math.random() * tokenCharSet.length)
-        );
-    }
-    return token;
-}
+    return {
+        qbase: "blue",
+        base: "#ecf0f1",
+        gray: "#bdc3c7",
+        qgrey: "grey-3",
+        color: "#3498db",
+        darkColor: "#2980b9",
+        text: "#000000",
+        qtext: "dark",
+        qcolor: "blue-10",
+        qdarkcolor: "dark",
+    };
+});
 </script>
 
 <style scoped>
-.app {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.Container {
+    padding-top: 100px;
+    width: 500px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-form {
-    display: flex;
-    flex-direction: column;
-    background-color: #ecf0f1;
-    filter: drop-shadow(0px 0px 6px #34495e76);
-    padding: 50px 25px;
-    border-radius: 15px;
+@media (max-width: 550px) {
+    .Container {
+        width: calc(100% - 40px);
+    }
 }
+</style>
 
+<style>
 input {
-    width: 250px;
-    margin: 15px 0;
-    height: 35px;
-    border: #bdc3c7 2px solid;
-    border-radius: 5px;
+    color: v-bind("colors.text") !important;
 }
 
-input:focus {
-    border: #3498db 2px solid;
-    outline: none;
+span,
+.q-toggle__label {
+    color: v-bind("colors.text") !important;
 }
 
-button {
-    height: 35px;
-    border: none;
-    background-color: #3498db;
-    border-radius: 5px;
-    color: #ecf0f1;
-    font-weight: 700;
-    margin-top: 15px;
-}
-
-button:hover {
-    background-color: #2980b9;
-}
-
-h2 {
-    color: #3498db;
+.q-item__label > span {
+    color: black !important;
 }
 </style>

@@ -1,43 +1,55 @@
 <template>
-            <div class="container">
-        <q-select filled v-model="settingsData.language" :options="options" label="Language" :bg-color="colors.qgrey"
-                :color="colors.qtext"
-                :label-color="colors.qtext" />
+    <div class="container">
+        <q-select
+            filled
+            v-model="settingsData.language"
+            :options="posibleLanguages"
+            label="Language"
+            :bg-color="colors.qgrey"
+            :color="colors.qtext"
+            :label-color="colors.qtext"
+        />
 
-        <q-toggle label="Dark mode" v-model="settingsData.mode" :bg-color="colors.qgrey"
-                :color="colors.qtext"
-                :label-color="colors.qtext" />
+        <q-toggle
+            label="Dark mode"
+            v-model="settingsData.mode"
+            :bg-color="colors.qgrey"
+            :color="colors.qtext"
+            :label-color="colors.qtext"
+        />
 
         <q-input
             filled
-            v-model="name"
+            v-model="placeholder"
             label="White listed domains"
             lazy-rules
             :rules="[
                 (val) => (val && val.length > 0) || 'Please type something',
             ]"
             :bg-color="colors.qgrey"
-                :color="colors.qtext"
-                :label-color="colors.qtext"
+            :color="colors.qtext"
+            :label-color="colors.qtext"
         />
-        <q-btn :color="colors.qbase"  label="Add domain" style="margin-top: 20px" />
+        <q-btn
+            :color="colors.qbase"
+            label="Add domain"
+            style="margin-top: 20px"
+        />
     </div>
 </template>
 
 <script setup>
 import { useSettingsStore } from "@/stores/settingsPre.js";
-import { useLangStore } from "@/stores/lang.js";
 import { useColorStore } from "@/stores/colorPalete.js";
-import ListItem from "../components/ListItem.vue";
-import { reactive, computed } from "vue";
+import { reactive, computed, watch } from "vue";
 let settingsData = reactive({
     mode: true,
     language: "en",
 });
 
-let urls = [];
-let langStore = useLangStore();
+let posibleLanguages = ["cs", "en"];
 
+let urls = [];
 let settingsStore = useSettingsStore();
 let colorStore = useColorStore();
 
@@ -55,7 +67,7 @@ let colors = computed(() => {
             qtext: colorStore.dark.qtext,
             qgrey: colorStore.dark.qgrey,
             qcolor: colorStore.dark.qcolor,
-            qdarkcolor: colorStore.dark.qdarkColor
+            qdarkcolor: colorStore.dark.qdarkColor,
         };
     } else if (settingsStore.mode == "Light") {
         return {
@@ -68,7 +80,7 @@ let colors = computed(() => {
             qbase: colorStore.light.qbase,
             qtext: colorStore.light.qtext,
             qgrey: colorStore.light.qgrey,
-            qdarkcolor: colorStore.light.qdarkColor
+            qdarkcolor: colorStore.light.qdarkColor,
         };
     }
 
@@ -82,74 +94,45 @@ let colors = computed(() => {
         text: "#000000",
         qtext: "dark",
         qcolor: "blue-10",
-        qdarkcolor: "dark"
+        qdarkcolor: "dark",
     };
 });
 
-if (settingsStore.mode == "Dark") {
-    settingsData.mode = true;
-}else{
-    settingsData.mode = false;
-}
-
-settingsData.language = settingsStore.language;
-
-urls = settingsStore.whiteList;
-
-let texts = reactive({
-    h2: "Settings",
-    mode: "Dark mode",
-    lang: "Language",
-    whiteL: "Whitelist of domains (for headless option).",
-    addButton: "Add to list",
-    saveButton: "Save",
-});
-
-function loadLanguage() {
-    if (settingsStore.language == "cs") {
-        texts.h2 = langStore.cz.settings.h2;
-        texts.mode = langStore.cz.settings.mode;
-        texts.lang = langStore.cz.settings.language;
-        texts.whiteL = langStore.cz.settings.wList;
-        texts.addButton = langStore.cz.settings.addButton;
-        texts.saveButton = langStore.cz.settings.saveButton;
-    } else if (settingsStore.language == "en") {
-        texts.h2 = langStore.en.settings.h2;
-        texts.mode = langStore.en.settings.mode;
-        texts.lang = langStore.en.settings.language;
-        texts.whiteL = langStore.en.settings.wList;
-        texts.addButton = langStore.en.settings.addButton;
-        texts.saveButton = langStore.en.settings.saveButton;
-    }
-}
-loadLanguage();
-
-function saveSettings() {
-    let mode = "";
-    if (settingsData.mode) {
-        mode = "Dark";
-    } else {
-        mode = "Light";
-    }
+watch(settingsData, (mode) => {
     settingsStore.$patch((state) => {
-        (state.mode = mode), (state.language = settingsData.language);
+        let saveMode
+        if (mode.mode) {
+            saveMode = "Dark";
+        } else {
+            saveMode = "Light";
+        }
+        (state.mode = saveMode), (state.language = settingsData.language);
     });
-
-    console.log(settingsStore.mode);
-
-    settingsStore = useSettingsStore();
-    colorStore = useColorStore();
-    loadColors();
-    loadLanguage();
-}
+});
 </script>
 
 <style scoped>
-/* I used switch from this codePen: https://codepen.io/mburnette/pen/LxNxNg */
-.container{
-    padding-top: 50px;
+.container {
+    padding-top: 100px;
     width: 500px;
     margin-left: auto;
     margin-right: auto;
+}
+
+@media (max-width: 550px) {
+    .container {
+        width: calc(100% - 40px);
+    }
+}
+</style>
+
+<style>
+span,
+.q-toggle__label {
+    color: v-bind("colors.text") !important;
+}
+
+.q-item__label > span {
+    color: black !important;
 }
 </style>
