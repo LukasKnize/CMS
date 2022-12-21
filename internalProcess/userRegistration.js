@@ -1,16 +1,24 @@
-//const { subtle } = require('crypto').webcrypto;
-//const fs = require('fs')
+const { subtle } = require('crypto').webcrypto;
+const fs = require('fs')
 
 let signup = async(data) => {
     let pasRegEx = new RegExp(/^((?=\S*?[A-Z])(?=\S*?[a-z])(?=\S*?[0-9]).{12,})\S$/);
     let emRegEx = RegExp(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/);
+    let db = JSON.parse(fs.readFileSync('./db.json'))
+
+    for (let i = 0; i < db.users.length; i++) {
+        if (db.users[i].username == data.username) {
+            console.log("Username is alredy taken")
+            return "Username is alredy taken"
+        }else if (db.users[i].email == data.email) {
+            console.log("Email is alredy being usen")
+            return "Email is alredy being usen"
+        }
+    }
+
     if (pasRegEx.test(data.password) && emRegEx.test(data.email)) {
         console.log(data.password)
-        //let hashedPass = await hashPassword(data.password)
-        let hashedPass = {
-            pass: "fjgdnfgudn",
-            salt: "sfhsfih"
-        }
+        let hashedPass = await hashPassword(data.password)
         let saveData = {
             username: data.username,
             email: data.email,
@@ -20,9 +28,25 @@ let signup = async(data) => {
         }
 
         console.log(saveData)
-        /* fs.appendFile("./db.json", JSON.stringify(saveData), function(err, result) {
-            if(err) console.log('error', err);
-          }) */
+
+          fs.readFile('./db.json', 'utf8', function (err, data) {
+            if (err) {
+                console.log(err)
+            } else {
+                const file = JSON.parse(data);
+                file.users.push(saveData)
+         
+                const json = JSON.stringify(file);
+         
+                fs.writeFile('./db.json', json, 'utf8', function(err){
+                     if(err){ 
+                           console.log(err); 
+                     } else {
+                           //Everything went OK!
+                     }});
+            }
+         
+         });
         return "ok"
     } else {
         return "bad request"
@@ -30,7 +54,7 @@ let signup = async(data) => {
 }
 
 
-/* async function hashPassword(pass) {
+async function hashPassword(pass) {
     let saltCharSet =
         "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     let salt = "";
@@ -75,7 +99,7 @@ let signup = async(data) => {
     const hash = await subtle.digest("SHA-256", data);
     let hpass = Array.prototype.map.call(new Uint8Array(hash), x => ('00' + x.toString(16)).slice(-2)).join('');
     return { pass: hpass, salt: salt };
-} */
+}
 
 
 module.exports = signup

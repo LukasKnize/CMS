@@ -4,11 +4,12 @@ require('dotenv').config()
 const jwt = require("jsonwebtoken")
 const userR = require("../internalProcess/userRegistration")
 const userL = require("../internalProcess/userLogin")
+const fs = require('fs')
 
 router.use(express.json())
 
 router.get("/", (req, res) => {
-    res.send()
+    res.send("ok bro")
 })
 
 router.post("/signUp", (req, res) => {
@@ -26,14 +27,15 @@ router.post("/signUp", (req, res) => {
 
     userR(user).then((result) => {
         if (result == "ok") {
-            let token = jwt.sign(user, process.env.SECRET)
+            let token = jwt.sign({username: user.username, email: user.email, type: user.type}, process.env.SECRET)
             res.json({ token: token })
         }else{
-            res.sendStatus(400)
+            res.status(400).send({message: result})
         }
     })
 
 })
+
 
 router.post("/logIn", (req, res) => {
     let loginInfo = {
@@ -42,11 +44,12 @@ router.post("/logIn", (req, res) => {
     }
 
     userL(loginInfo).then((result) => {
-        if (result == "ok") {
-            let token = jwt.sign(/* data poslaná z db */ dbData, process.env.SECRET)
+        if (!isNaN(result)) {
+            db = JSON.parse(fs.readFileSync('./db.json'))
+            let token = jwt.sign({username: db.users[result].username, email: db.users[result].email, type: db.users[result].type}, process.env.SECRET)
             res.json({ token: token })
         }else{
-            res.sendStatus(400)
+            res.status(400).send({message: result})
         }
     })
 })
