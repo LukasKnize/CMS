@@ -24,7 +24,8 @@ let signup = async(data) => {
             email: data.email,
             type: data.type,
             password: hashedPass.pass,
-            salt: hashedPass.salt
+            salt: hashedPass.salt,
+            id: require('crypto').randomBytes(16).toString('hex')
         }
 
         console.log(saveData)
@@ -47,7 +48,7 @@ let signup = async(data) => {
             }
          
          });
-        return "ok"
+        return ["ok", saveData.id]
     } else {
         return "bad request"
     }

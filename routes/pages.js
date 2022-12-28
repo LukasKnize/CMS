@@ -20,7 +20,15 @@ router.use(express.json())
 
 router.get('/all', (req, res) => {
     let db = JSON.parse(fs.readFileSync('./db.json'))
-    res.send(JSON.stringify(db.pages))
+    let resPages = db.pages
+    for (let i = 0; i < db.pages.length; i++) {
+        for (let j = 0; j < db.users.length; j++) {
+            if (db.users[j].id == resPages[i].author) {
+                resPages[i].authorName = db.users[j].username
+            }
+        }
+    }
+    res.send(JSON.stringify(resPages))
 })
 
 router.post("/", (req, res) => {
@@ -28,27 +36,28 @@ router.post("/", (req, res) => {
         const token = req.headers['authorization']
         let parsedToken = jwt.verify(token, process.env.SECRET)
         let db = JSON.parse(fs.readFileSync('./db.json'))
+        console.log(parsedToken.id)
         let page = req.body
         if (db.pages.length != 0) {
             for (let i = 0; i < db.pages.length; i++) {
-                if(db.pages[i].url == req.body.url){
+                if (db.pages[i].url == req.body.url) {
                     res.sendStatus(409)
                     break
-                }else if (i == db.pages.length - 1) {
-                    page.author = parsedToken.email
+                } else if (i == db.pages.length - 1) {
+                    page.author = parsedToken.id
                     db.pages.push(page)
                     fs.writeFileSync('./db.json', JSON.stringify(db))
                     res.sendStatus(201)
                     break
                 }
             }
-        }else{
-            page.author = parsedToken.email
-                    db.pages.push(page)
-                    fs.writeFileSync('./db.json', JSON.stringify(db))
-                    res.sendStatus(201)
+        } else {
+            page.author = parsedToken.id
+            db.pages.push(page)
+            fs.writeFileSync('./db.json', JSON.stringify(db))
+            res.sendStatus(201)
         }
-        
+
     } catch (error) {
         res.sendStatus(403)
     }

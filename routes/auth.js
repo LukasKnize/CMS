@@ -26,8 +26,8 @@ router.post("/signUp", (req, res) => {
     }
 
     userR(user).then((result) => {
-        if (result == "ok") {
-            let token = jwt.sign({username: user.username, email: user.email, type: user.type}, process.env.SECRET)
+        if (result[0] == "ok") {
+            let token = jwt.sign({username: user.username, email: user.email, type: user.type, id: result[1]}, process.env.SECRET)
             res.json({ token: token })
         }else{
             res.status(400).send({message: result})
@@ -52,6 +52,23 @@ router.post("/logIn", (req, res) => {
             res.status(400).send({message: result})
         }
     })
+})
+
+router.post("/deleteAccount", (req, res) => {
+    try {
+        const token = req.headers['authorization']
+        let parsedToken = jwt.verify(token, process.env.SECRET)
+        console.log(parsedToken.type)
+        if (parsedToken.type == "admin") {
+            if (req.body.id != undefined && req.body.id != "") {
+                //find user in db and delete
+            }
+        }else{
+            res.status(403).send({message: "access denied, only admin can delete other accounts"})
+        }
+    } catch (error) {
+        res.sendStatus(400)
+    }
 })
 
 module.exports = router

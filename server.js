@@ -23,9 +23,11 @@ api.use(express.static(path.join(__dirname, "uploads")))
 
 const authRouter = require('./routes/auth')
 const pageRouter = require('./routes/pages')
+const templateRouter = require("./routes/template")
 
 api.use('/auth', authRouter)
 api.use('/pages', pageRouter)
+api.use('/template', templateRouter)
 
 ui.listen(uiPort);
 console.log('UI Server started at http://localhost:' + uiPort);
