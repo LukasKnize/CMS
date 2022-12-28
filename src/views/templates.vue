@@ -1,33 +1,51 @@
 <template>
-<div class="Container">
-    <q-card class="my-card" :class="'bg-' + colors.qgrey + ' ' + 'text-' + colors.qtext">
-      <q-card-section>
-        <div class="text-h6 q-mb-xs">Our Changing Planet</div>
-      </q-card-section>
+    <div class="Container">
+        <q-card
+            class="my-card"
+            :class="'bg-' + colors.qgrey + ' ' + 'text-' + colors.qtext"
+        >
+            <q-card-section>
+                <div class="text-h6 q-mb-xs">Our Changing Planet</div>
+            </q-card-section>
 
-      <img src="https://cdn.quasar.dev/img/mountains.jpg">
+            <img src="https://cdn.quasar.dev/img/mountains.jpg" />
 
-      <q-card-actions style="display: flex; justify-content: space-evenly">
-        <q-btn flat round color="primary" icon="edit" />
-        <q-btn flat round color="red" icon="delete" />
-        <q-btn flat round color="teal" icon="download" />
-      </q-card-actions>
-    </q-card>
+            <q-card-actions
+                style="display: flex; justify-content: space-evenly"
+            >
+                <q-btn flat round color="primary" icon="edit" />
+                <q-btn flat round color="red" icon="delete" />
+                <q-btn flat round color="teal" icon="download" />
+            </q-card-actions>
+        </q-card>
 
-    <q-card class="my-card" :class="'bg-' + colors.qgrey + ' ' + 'text-' + colors.qtext">
-      <q-card-section>
-        <div class="text-h6 q-mb-xs">Our Changing Planet</div>
-      </q-card-section>
+        <q-card
+            class="my-card"
+            :class="'bg-' + colors.qgrey + ' ' + 'text-' + colors.qtext"
+        >
+            <q-card-section>
+                <div class="text-h6 q-mb-xs">Our Changing Planet</div>
+            </q-card-section>
 
-      <img src="https://cdn.quasar.dev/img/mountains.jpg">
+            <img src="https://cdn.quasar.dev/img/mountains.jpg" />
 
-      <q-card-actions style="display: flex; justify-content: space-evenly">
-        <q-btn flat round color="primary" icon="edit" />
-        <q-btn flat round color="red" icon="delete" />
-        <q-btn flat round color="teal" icon="download" />
-      </q-card-actions>
-    </q-card>
-</div>
+            <q-card-actions
+                style="display: flex; justify-content: space-evenly"
+            >
+                <q-btn flat round color="primary" icon="edit" />
+                <q-btn flat round color="red" icon="delete" />
+                <q-btn flat round color="teal" icon="download" />
+            </q-card-actions>
+        </q-card>
+
+        <q-card
+            class="my-card addCard"
+            :class="'bg-' + colors.qgrey + ' ' + 'text-' + colors.qtext"
+            @click="addTemplate"
+        >
+            <q-icon name="add_circle" color="primary" size="xl" />
+        </q-card>
+    </div>
 </template>
 
 <script setup>
@@ -52,7 +70,7 @@ let colors = computed(() => {
             qtext: colorStore.dark.qtext,
             qgrey: colorStore.dark.qgrey,
             qcolor: colorStore.dark.qcolor,
-            qdarkcolor: colorStore.dark.qdarkColor
+            qdarkcolor: colorStore.dark.qdarkColor,
         };
     } else if (settingsStore.mode == "Light") {
         return {
@@ -65,7 +83,7 @@ let colors = computed(() => {
             qbase: colorStore.light.qbase,
             qtext: colorStore.light.qtext,
             qgrey: colorStore.light.qgrey,
-            qdarkcolor: colorStore.light.qdarkColor
+            qdarkcolor: colorStore.light.qdarkColor,
         };
     }
 
@@ -79,13 +97,34 @@ let colors = computed(() => {
         text: "#000000",
         qtext: "dark",
         qcolor: "blue-10",
-        qdarkcolor: "dark"
+        qdarkcolor: "dark",
     };
 });
+
+function addTemplate() {
+  let input = document.createElement("input");
+    input.type = "file";
+    input.name = "template";
+    input.accept = ".zip";
+
+    input.onchange = (e) => {
+        let file = e.target.files[0];
+        let data = new FormData()
+        data.append("template", file)
+        fetch("http://localhost:5500/template", {
+            method: "POST",
+            body: data,
+        }).then((resp) => {
+            console.log(resp);
+        });
+    };
+
+    input.click();
+}
 </script>
 
 <style scoped>
-.Container{
+.Container {
     display: flex;
     flex-wrap: wrap;
     width: calc(100% - 300px);
@@ -96,23 +135,32 @@ let colors = computed(() => {
     margin-right: auto;
 }
 
-.my-card{
-  width: 250px;
-  height: 300px;
-  margin-left: 20px;
-  margin-right: 20px;
-  margin-bottom: 20px;
+.my-card {
+    width: 250px;
+    height: 300px;
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-bottom: 20px;
 }
 
-@media(max-width: 1000px){
-  .Container{
+.addCard {
+    display: flex;
     justify-content: center;
-  }
+    align-items: center;
+}
+.addCard:hover {
+    background-color: rgba(0, 0, 0, 0.105);
 }
 
-@media(max-width: 650px){
-  .Container{
-    width: 100%;
-  }
+@media (max-width: 1000px) {
+    .Container {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 650px) {
+    .Container {
+        width: 100%;
+    }
 }
 </style>

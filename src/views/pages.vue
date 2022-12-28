@@ -1,92 +1,42 @@
 <template>
     <div class="Container">
-        <q-card class="my-card" :class="'bg-' + colors.qgrey + ' ' + 'text-' + colors.qtext">
-      <q-card-section>
-        <div class="text-h6">Our Changing Planet</div>
-        <div class="text-subtitle2">by John Doe</div>
-      </q-card-section>
+        <q-card
+            v-for="(pageData, index) in pages.page"
+            :key="index"
+            class="my-card"
+            :class="'bg-' + colors.qgrey + ' ' + 'text-' + colors.qtext"
+        >
+            <q-card-section>
+                <div class="text-h6">{{ pageData.headline }}</div>
+                <div class="text-subtitle2">{{ pageData.authorName }}</div>
+            </q-card-section>
 
-      <q-card-section>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-      </q-card-section>
+            <q-card-section>
+                {{ pageData.desc }}
+            </q-card-section>
 
-      <q-card-actions>
-       <q-btn flat round color="negative" icon="delete" />
-        <q-btn flat round color="primary" icon="edit" />
-      </q-card-actions>
-    </q-card>
-    <q-card class="my-card" :class="'bg-' + colors.qgrey + ' ' + 'text-' + colors.qtext">
-      <q-card-section>
-        <div class="text-h6">Our Changing Planet</div>
-        <div class="text-subtitle2">by John Doe</div>
-      </q-card-section>
+            <q-card-actions>
+                <q-btn flat round color="negative" icon="delete" />
+                <q-btn flat round color="primary" icon="edit" />
+            </q-card-actions>
+        </q-card>
 
-      <q-card-section>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-      </q-card-section>
-
-      <q-card-actions>
-       <q-btn flat round color="negative" icon="delete" />
-        <q-btn flat round color="primary" icon="edit" />
-      </q-card-actions>
-    </q-card>
-    <q-card class="my-card" :class="'bg-' + colors.qgrey + ' ' + 'text-' + colors.qtext">
-      <q-card-section>
-        <div class="text-h6">Our Changing Planet</div>
-        <div class="text-subtitle2">by John Doe</div>
-      </q-card-section>
-
-      <q-card-section>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-      </q-card-section>
-
-      <q-card-actions>
-       <q-btn flat round color="negative" icon="delete" />
-        <q-btn flat round color="primary" icon="edit" />
-      </q-card-actions>
-    </q-card>
-    <q-card class="my-card" :class="'bg-' + colors.qgrey + ' ' + 'text-' + colors.qtext">
-      <q-card-section>
-        <div class="text-h6">Our Changing Planet</div>
-        <div class="text-subtitle2">by John Doe</div>
-      </q-card-section>
-
-      <q-card-section>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-      </q-card-section>
-
-      <q-card-actions>
-       <q-btn flat round color="negative" icon="delete" />
-        <q-btn flat round color="primary" icon="edit" />
-      </q-card-actions>
-    </q-card>
-    <q-card class="my-card" :class="'bg-' + colors.qgrey + ' ' + 'text-' + colors.qtext">
-      <q-card-section>
-        <div class="text-h6">Our Changing Planet</div>
-        <div class="text-subtitle2">by John Doe</div>
-      </q-card-section>
-
-      <q-card-section>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-      </q-card-section>
-
-      <q-card-actions>
-       <q-btn flat round color="negative" icon="delete" />
-        <q-btn flat round color="primary" icon="edit" />
-      </q-card-actions>
-    </q-card>
-
-    <q-card class="my-card addCard" :class="'bg-' + colors.qgrey + ' ' + 'text-' + colors.qtext">
-      <q-icon name="add_circle" color="primary" size="xl" />
-    </q-card>
+        <q-card
+            class="my-card addCard"
+            :class="'bg-' + colors.qgrey + ' ' + 'text-' + colors.qtext"
+        >
+            <q-icon name="add_circle" color="primary" size="xl" />
+        </q-card>
     </div>
 </template>
 
 
 <script setup>
 import { useSettingsStore } from "@/stores/settingsPre.js";
-import { reactive, computed } from "vue";
+import { reactive, computed, ref } from "vue";
 import { useColorStore } from "@/stores/colorPalete.js";
+
+let pages = reactive({ page: "" });
 
 let settingsStore = useSettingsStore();
 let colorStore = useColorStore();
@@ -105,7 +55,7 @@ let colors = computed(() => {
             qtext: colorStore.dark.qtext,
             qgrey: colorStore.dark.qgrey,
             qcolor: colorStore.dark.qcolor,
-            qdarkcolor: colorStore.dark.qdarkColor
+            qdarkcolor: colorStore.dark.qdarkColor,
         };
     } else if (settingsStore.mode == "Light") {
         return {
@@ -118,7 +68,7 @@ let colors = computed(() => {
             qbase: colorStore.light.qbase,
             qtext: colorStore.light.qtext,
             qgrey: colorStore.light.qgrey,
-            qdarkcolor: colorStore.light.qdarkColor
+            qdarkcolor: colorStore.light.qdarkColor,
         };
     }
 
@@ -132,14 +82,32 @@ let colors = computed(() => {
         text: "#000000",
         qtext: "dark",
         qcolor: "blue-10",
-        qdarkcolor: "dark"
+        qdarkcolor: "dark",
     };
 });
+
+function getPages() {
+    fetch("http://localhost:5500/pages/all", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            authorization:
+                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Ik5la28iLCJlbWFpbCI6Im5la29AdGhlNG5la28uaW8iLCJ0eXBlIjoiYWRtaW4iLCJpYXQiOjE2NzE2MzYyODd9.9760M_vr79SLJUg74lwTQ43_Kc0VApesnV-2GGjXXXA",
+        },
+    }).then((resp) => {
+        resp.json().then((data) => {
+            pages.page = data;
+            console.log(JSON.parse(JSON.stringify(pages.page))[0].url);
+        });
+    });
+}
+
+getPages();
 </script>
 
 
 <style scoped>
-.Container{
+.Container {
     display: flex;
     flex-wrap: wrap;
     width: calc(100% - 300px);
@@ -150,38 +118,38 @@ let colors = computed(() => {
     margin-right: auto;
 }
 
-.my-card{
-  width: 250px;
-  height: 300px;
-  margin-left: 20px;
-  margin-right: 20px;
-  margin-bottom: 20px;
+.my-card {
+    width: 250px;
+    height: 300px;
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-bottom: 20px;
 }
 
-.addCard{
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.addCard:hover{
-  background-color: rgba(0, 0, 0, 0.105);
-}
-
-@media(max-width: 1000px){
-  .Container{
+.addCard {
+    display: flex;
     justify-content: center;
-  }
+    align-items: center;
 }
 
-@media(max-width: 650px){
-  .Container{
-    width: 100%;
-  }
+.addCard:hover {
+    background-color: rgba(0, 0, 0, 0.105);
+}
 
-  .my-card{
-    min-height: 300px;
-    height: auto;
-  }
+@media (max-width: 1000px) {
+    .Container {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 650px) {
+    .Container {
+        width: 100%;
+    }
+
+    .my-card {
+        min-height: 300px;
+        height: auto;
+    }
 }
 </style>
