@@ -91,13 +91,11 @@ function getPages() {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
-            authorization:
-                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Ik5la28iLCJlbWFpbCI6Im5la29AdGhlNG5la28uaW8iLCJ0eXBlIjoiYWRtaW4iLCJpYXQiOjE2NzE2MzYyODd9.9760M_vr79SLJUg74lwTQ43_Kc0VApesnV-2GGjXXXA",
+            authorization: settingsStore.token,
         },
     }).then((resp) => {
         resp.json().then((data) => {
             pages.page = data;
-            console.log(JSON.parse(JSON.stringify(pages.page))[0].url);
         });
     });
 }

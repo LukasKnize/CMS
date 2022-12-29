@@ -15,6 +15,8 @@
                 :label-color="colors.qtext"
             />
 
+            <p class="errMessage">{{errorMessage.message}}</p>
+
             <q-input
                 filled
                 type="password"
@@ -38,7 +40,12 @@
             />
 
             <div>
-                <q-btn label="Submit" type="submit" :color="colors.qbase" @click="login" />
+                <q-btn
+                    label="Submit"
+                    type="submit"
+                    :color="colors.qbase"
+                    @click="login"
+                />
             </div>
         </q-form>
     </div>
@@ -51,6 +58,8 @@ import { useColorStore } from "@/stores/colorPalete.js";
 
 let settingsStore = useSettingsStore();
 let colorStore = useColorStore();
+
+let errorMessage = reactive({message: ""})
 
 let colors = computed(() => {
     colorStore = useColorStore();
@@ -103,21 +112,31 @@ let loginData = reactive({
     save: false,
 });
 
-async function login(e) {
+function login(e) {
     e.preventDefault();
     let data = {
         email: loginData.email,
         password: loginData.password,
     };
-    const resp = fetch("http://localhost:5500/auth/logIn/", {
+    fetch("http://localhost:5500/auth/logIn/", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
+    }).then((resp) => {
+        resp.json().then((token) => {
+            if (token.token == undefined) {
+                errorMessage.message = token.message
+                loginData.password = ""
+            }else{
+                settingsStore.$patch((state) => {
+                state.token = token.token;
+            });
+            }
+            
+        });
     });
-
-    console.log(await resp);
 }
 </script>
 <style scoped>
@@ -126,6 +145,10 @@ async function login(e) {
     width: 500px;
     margin-left: auto;
     margin-right: auto;
+}
+
+.errMessage{
+    color: #c10015;
 }
 
 @media (max-width: 550px) {

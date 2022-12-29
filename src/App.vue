@@ -111,6 +111,12 @@ let colors = computed(() => {
         qdarkcolor: "dark",
     };
 });
+
+setInterval(() => {
+    if (settingsStore.token == "") {
+        router.push("logIn")
+    }
+}, 1000)
 </script>
 
 <template>

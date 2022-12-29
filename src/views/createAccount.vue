@@ -69,7 +69,12 @@
             />
 
             <div>
-                <q-btn label="Submit" type="submit" :color="colors.qbase" @click="createUser" />
+                <q-btn
+                    label="Submit"
+                    type="submit"
+                    :color="colors.qbase"
+                    @click="createUser"
+                />
             </div>
         </q-form>
     </div>
@@ -117,8 +122,8 @@ function emailValid(p) {
     return emRegEx.test(p);
 }
 
-async function createUser(e) {
-    e.preventDefault()
+function createUser(e) {
+    e.preventDefault();
     if (
         data.username != "" &&
         emailValid(data.email) &&
@@ -132,15 +137,19 @@ async function createUser(e) {
             type: data.accountType,
             password: data.pass,
         };
-        const resp = fetch("http://localhost:5500/auth/signUp/", {
+        fetch("http://localhost:5500/auth/signUp/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify(userData),
+        }).then((resp) => {
+            resp.json().then((token) => {
+                settingsStore.$patch((state) => {
+                    state.token = token.token;
+                });
+            });
         });
-
-        console.log(await resp)
     }
 }
 

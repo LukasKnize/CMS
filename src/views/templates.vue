@@ -2,32 +2,13 @@
     <div class="Container">
         <q-card
             class="my-card"
-            :class="'bg-' + colors.qgrey + ' ' + 'text-' + colors.qtext"
+            :class="'bg-' + colors.qgrey + ' ' + 'text-' + colors.qtext" v-for="(template, index) in templates.templates" :key="index"
         >
             <q-card-section>
-                <div class="text-h6 q-mb-xs">Our Changing Planet</div>
+                <div class="text-h6 q-mb-xs">{{template.name}}</div>
             </q-card-section>
 
-            <img src="https://cdn.quasar.dev/img/mountains.jpg" />
-
-            <q-card-actions
-                style="display: flex; justify-content: space-evenly"
-            >
-                <q-btn flat round color="primary" icon="edit" />
-                <q-btn flat round color="red" icon="delete" />
-                <q-btn flat round color="teal" icon="download" />
-            </q-card-actions>
-        </q-card>
-
-        <q-card
-            class="my-card"
-            :class="'bg-' + colors.qgrey + ' ' + 'text-' + colors.qtext"
-        >
-            <q-card-section>
-                <div class="text-h6 q-mb-xs">Our Changing Planet</div>
-            </q-card-section>
-
-            <img src="https://cdn.quasar.dev/img/mountains.jpg" />
+            <img :src="'http://localhost:5500/' + template.img" />
 
             <q-card-actions
                 style="display: flex; justify-content: space-evenly"
@@ -55,6 +36,8 @@ import { useColorStore } from "@/stores/colorPalete.js";
 
 let settingsStore = useSettingsStore();
 let colorStore = useColorStore();
+
+let templates = reactive({templates: ""})
 
 let colors = computed(() => {
     colorStore = useColorStore();
@@ -121,6 +104,18 @@ function addTemplate() {
 
     input.click();
 }
+
+fetch("http://localhost:5500/template/all", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            authorization: settingsStore.token,
+        },
+    }).then((resp) => {
+        resp.json().then((data) => {
+            templates.templates = data .templates;
+        });
+    });
 </script>
 
 <style scoped>
@@ -150,6 +145,10 @@ function addTemplate() {
 }
 .addCard:hover {
     background-color: rgba(0, 0, 0, 0.105);
+}
+
+.q-card > img {
+max-height: 170px;
 }
 
 @media (max-width: 1000px) {
