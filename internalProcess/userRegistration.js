@@ -8,16 +8,13 @@ let signup = async(data) => {
 
     for (let i = 0; i < db.users.length; i++) {
         if (db.users[i].username == data.username) {
-            console.log("Username is alredy taken")
             return "Username is alredy taken"
         }else if (db.users[i].email == data.email) {
-            console.log("Email is alredy being usen")
             return "Email is alredy being usen"
         }
     }
 
     if (pasRegEx.test(data.password) && emRegEx.test(data.email)) {
-        console.log(data.password)
         let hashedPass = await hashPassword(data.password)
         let saveData = {
             username: data.username,
@@ -27,8 +24,6 @@ let signup = async(data) => {
             salt: hashedPass.salt,
             id: require('crypto').randomBytes(16).toString('hex')
         }
-
-        console.log(saveData)
 
           fs.readFile('./db.json', 'utf8', function (err, data) {
             if (err) {

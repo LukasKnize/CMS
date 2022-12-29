@@ -1,20 +1,8 @@
 const express = require('express')
 require('dotenv').config()
 const router = express.Router()
-const multer = require('multer')
 const fs = require('fs')
 const jwt = require("jsonwebtoken")
-
-let storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads/')
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + '.jpg') //Appending .jpg
-    }
-})
-
-let upload = multer({ storage: storage });
 
 router.use(express.json())
 
@@ -47,7 +35,7 @@ router.post("/", (req, res) => {
                     page.author = parsedToken.id
                     db.pages.push(page)
                     fs.writeFileSync('./db.json', JSON.stringify(db))
-                    res.sendStatus(201)
+                    res.status(201).send({message: "crated"})
                     break
                 }
             }
@@ -55,7 +43,7 @@ router.post("/", (req, res) => {
             page.author = parsedToken.id
             db.pages.push(page)
             fs.writeFileSync('./db.json', JSON.stringify(db))
-            res.sendStatus(201)
+            res.status(201).send({message: "crated"})
         }
 
     } catch (error) {
@@ -73,12 +61,6 @@ router.get('/:urlParameter', (req, res) => {
             res.sendStatus(404)
         }
     }
-})
-
-router.post("/fileTest", upload.single('avatar'), (req, res) => {
-    let datta = req.file.filename
-    console.log(datta)
-    //fs.writeFileSync("test.png", datta)
 })
 
 module.exports = router

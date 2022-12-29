@@ -19,6 +19,7 @@ api.use(express.json())
 
 ui.use(express.static(path.join(__dirname, "public")))
 api.use(express.static(path.join(__dirname, "uploads")))
+api.use(express.static(path.join(__dirname, "templates")))
 // sendFile will go here
 
 const authRouter = require('./routes/auth')
