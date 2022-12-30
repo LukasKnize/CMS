@@ -3,64 +3,67 @@ require('dotenv').config()
 const router = express.Router()
 const fs = require('fs')
 const jwt = require("jsonwebtoken")
+const mongoose = require('mongoose')
+const Page = require('../dbSchemas/pageShema')
 
 router.use(express.json())
 
-router.get('/all', (req, res) => {
-    let db = JSON.parse(fs.readFileSync('./db.json'))
-    let resPages = db.pages
-    for (let i = 0; i < db.pages.length; i++) {
-        for (let j = 0; j < db.users.length; j++) {
-            if (db.users[j].id == resPages[i].author) {
-                resPages[i].authorName = db.users[j].username
-            }
-        }
+router.get('/all', async (req, res) => {
+    let pages = await Page.find({})
+    let resPages = pages
+    for (let i = 0; i < pages.length; i++) {
+        resPages[i].toJSON().authorName = await Page.find({id: resPages[i].author})
     }
     res.send(JSON.stringify(resPages))
 })
 
-router.post("/", (req, res) => {
+router.post("/", async (req, res) => {
     try {
         const token = req.headers['authorization']
         let parsedToken = jwt.verify(token, process.env.SECRET)
-        let db = JSON.parse(fs.readFileSync('./db.json'))
-        console.log(parsedToken.id)
         let page = req.body
-        if (db.pages.length != 0) {
-            for (let i = 0; i < db.pages.length; i++) {
-                if (db.pages[i].url == req.body.url) {
-                    res.sendStatus(409)
-                    break
-                } else if (i == db.pages.length - 1) {
-                    page.author = parsedToken.id
-                    db.pages.push(page)
-                    fs.writeFileSync('./db.json', JSON.stringify(db))
-                    res.status(201).send({message: "crated"})
-                    break
-                }
-            }
+        if (await Page.exists({ url: req.body.url }) != null) {
+            res.sendStatus(409)
         } else {
-            page.author = parsedToken.id
-            db.pages.push(page)
-            fs.writeFileSync('./db.json', JSON.stringify(db))
-            res.status(201).send({message: "crated"})
-        }
+            let id = require('crypto').randomBytes(16).toString('hex')
+            while (await Page.exists({ id: id }) != null) {
+                id = require('crypto').randomBytes(16).toString('hex')
+            }
+            let newPage = new Page({
+                headline: page.headline,
+                id: id,
+                url: page.url,
+                desc: page.desc,
+                template: page.template,
+                visited: 0,
+                author: parsedToken.id
+            })
 
+            await newPage.save()
+
+            res.status(201).send({ message: "crated", id: id })
+        }
     } catch (error) {
+        console.log(error)
         res.sendStatus(403)
     }
 })
 
-router.get('/:urlParameter', (req, res) => {
-    let db = JSON.parse(fs.readFileSync('./db.json'))
-    for (let i = 0; i < db.pages.length; i++) {
-        if (db.pages[i].url == req.params.urlParameter) {
-            res.send(db.pages[i])
-            break
-        } else if (i == db.pages.length - 1) {
-            res.sendStatus(404)
-        }
+router.post('/data/:urlParameter', async (req, res) => {
+    let page = await Page.findOne({id: req.params.urlParameter})
+    if (page != null) {
+        page.content = req.body.content
+        page.save()
     }
+})
+
+router.get('/:urlParameter', async (req, res) => {
+    let page = await Page.findOne({url: req.params.urlParameter})
+        if (page == null) {
+            res.sendStatus(404)
+        } else {
+            res.send(page.toJSON())
+        }
 })
 
 module.exports = router

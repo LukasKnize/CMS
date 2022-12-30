@@ -5,6 +5,8 @@ const jwt = require("jsonwebtoken")
 const userR = require("../internalProcess/userRegistration")
 const userL = require("../internalProcess/userLogin")
 const fs = require('fs')
+const mongoose = require('mongoose')
+const User = require('../dbSchemas/userShema')
 
 router.use(express.json())
 
@@ -27,29 +29,37 @@ router.post("/signUp", (req, res) => {
 
     userR(user).then((result) => {
         if (result[0] == "ok") {
-            let token = jwt.sign({username: user.username, email: user.email, type: user.type, id: result[1]}, process.env.SECRET)
+            let token = jwt.sign({ username: user.username, email: user.email, type: user.type, id: result[1] }, process.env.SECRET)
             res.json({ token: token })
-        }else{
-            res.status(400).send({message: result})
+        } else {
+            res.status(400).send({ message: result })
         }
     })
 
 })
 
 
-router.post("/logIn", (req, res) => {
+router.post("/logIn", async (req, res) => {
     let loginInfo = {
         email: req.body.email,
         password: req.body.password
     }
 
-    userL(loginInfo).then((result) => {
-        if (!isNaN(result)) {
-            db = JSON.parse(fs.readFileSync('./db.json'))
-            let token = jwt.sign({username: db.users[result].username, email: db.users[result].email, type: db.users[result].type}, process.env.SECRET)
+    userL(loginInfo).then( async (result) => {
+        if (result != "bad pass") {
+            let user = await User.find({ id: result })
+            user = user[0].toJSON()
+            if (user != null) {
+                let token = jwt.sign({ username: user.username, email: user.email, type: user.type }, process.env.SECRET)
             res.json({ token: token })
-        }else{
-            res.status(400).send({message: result})
+            }else{
+                res.sendStatus(404)
+            }
+            
+
+
+        } else {
+            res.status(400).send({ message: result })
         }
     })
 })
@@ -63,8 +73,8 @@ router.post("/deleteAccount", (req, res) => {
             if (req.body.id != undefined && req.body.id != "") {
                 //find user in db and delete
             }
-        }else{
-            res.status(403).send({message: "access denied, only admin can delete other accounts"})
+        } else {
+            res.status(403).send({ message: "access denied, only admin can delete other accounts" })
         }
     } catch (error) {
         res.sendStatus(400)

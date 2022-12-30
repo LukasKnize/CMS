@@ -2,6 +2,10 @@ const express = require('express');
 const path = require('path');
 const history = require('connect-history-api-fallback');
 const cors = require('cors')
+const mongoose = require('mongoose')
+const User = require('./dbSchemas/userShema')
+
+mongoose.connect("mongodb://localhost:27017/CMS")
 
 const ui = express();
 const api = express()
@@ -24,7 +28,8 @@ api.use(express.static(path.join(__dirname, "templates")))
 
 const authRouter = require('./routes/auth')
 const pageRouter = require('./routes/pages')
-const templateRouter = require("./routes/template")
+const templateRouter = require("./routes/template");
+const { use } = require('./routes/auth');
 
 api.use('/auth', authRouter)
 api.use('/pages', pageRouter)

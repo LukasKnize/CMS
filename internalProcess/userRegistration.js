@@ -1,18 +1,19 @@
 const { subtle } = require('crypto').webcrypto;
 const fs = require('fs')
+const mongoose = require('mongoose')
+const User = require('../dbSchemas/userShema')
 
-let signup = async(data) => {
+let signup = async (data) => {
     let pasRegEx = new RegExp(/^((?=\S*?[A-Z])(?=\S*?[a-z])(?=\S*?[0-9]).{12,})\S$/);
     let emRegEx = RegExp(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/);
-    let db = JSON.parse(fs.readFileSync('./db.json'))
 
-    for (let i = 0; i < db.users.length; i++) {
+/*     for (let i = 0; i < db.users.length; i++) {
         if (db.users[i].username == data.username) {
             return "Username is alredy taken"
-        }else if (db.users[i].email == data.email) {
+        } else if (db.users[i].email == data.email) {
             return "Email is alredy being usen"
         }
-    }
+    } */
 
     if (pasRegEx.test(data.password) && emRegEx.test(data.email)) {
         let hashedPass = await hashPassword(data.password)
@@ -25,24 +26,42 @@ let signup = async(data) => {
             id: require('crypto').randomBytes(16).toString('hex')
         }
 
-          fs.readFile('./db.json', 'utf8', function (err, data) {
+        while (await User.exists({ id: saveData.id }) != null) {
+            saveData.id = require('crypto').randomBytes(16).toString('hex')
+        }
+
+
+        const user = new User({
+            username: saveData.username,
+            email: saveData.email,
+            type: saveData.type,
+            password: saveData.password,
+            salt: saveData.salt,
+            id: saveData.id,
+            isActive: true
+        })
+
+        await user.save()
+
+        /* fs.readFile('./db.json', 'utf8', function (err, data) {
             if (err) {
                 console.log(err)
             } else {
                 const file = JSON.parse(data);
                 file.users.push(saveData)
-         
+
                 const json = JSON.stringify(file);
-         
-                fs.writeFile('./db.json', json, 'utf8', function(err){
-                     if(err){ 
-                           console.log(err); 
-                     } else {
-                           //Everything went OK!
-                     }});
+
+                fs.writeFile('./db.json', json, 'utf8', function (err) {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        //Everything went OK!
+                    }
+                });
             }
-         
-         });
+
+        }); */
         return ["ok", saveData.id]
     } else {
         return "bad request"

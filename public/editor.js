@@ -1,3 +1,9 @@
+const params = new Proxy(new URLSearchParams(window.location.search), {
+    get: (searchParams, prop) => searchParams.get(prop),
+  });
+  let token = params.token
+  let pageId = params.id
+  
 let items = document.body.getElementsByTagName("*")
 
 class data {
@@ -72,16 +78,14 @@ async function save() {
         }
     }
 
-    const resp = fetch("http://localhost:5500/pages/", {
+    const resp = fetch("http://localhost:5500/pages/data/" + pageId, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "authorization": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Ik5la28iLCJlbWFpbCI6Im5la29AdGhlNG5la28uaW8iLCJ0eXBlIjoiYWRtaW4iLCJpYXQiOjE2NzE2MzYyODd9.9760M_vr79SLJUg74lwTQ43_Kc0VApesnV-2GGjXXXA"
+            "authorization": token
         },
         body: JSON.stringify({
-            "url": "superCoolPage",
-            "text": editedData,
-            "headline": "Awesome headline"
+            "content": editedData,
         }),
     });
 
