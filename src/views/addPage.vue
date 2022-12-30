@@ -149,7 +149,7 @@ function createPage(e) {
         body: JSON.stringify(data),
     }).then((resp) => {
         resp.json().then((dataresp) => {
-            window.location.href = "http://localhost:5500/template/edit/" + data.template + "?token=" + settingsStore.token
+            window.location.href = "http://localhost:5500/template/edit/" + data.template + "?token=" + settingsStore.token + "&id=" + dataresp.id
         });
     });
 }
