@@ -17,7 +17,7 @@
 
             <q-card-actions>
                 <q-btn flat round color="negative" icon="delete" />
-                <q-btn flat round color="primary" icon="edit" />
+                <q-btn flat round color="primary" icon="edit" @click="editPage(pageData.id)" />
             </q-card-actions>
         </q-card>
 
@@ -101,6 +101,10 @@ function getPages() {
 }
 
 getPages();
+
+function editPage(id){
+    window.location.href = "http://localhost:5500/template/edit/" + data.template + "?token=" + settingsStore.token + "&id=" + id
+}
 </script>
 
 
