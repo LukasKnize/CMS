@@ -59,7 +59,6 @@ router.get("/all", (req, res) => {
 })
 
 router.get("/edit/:param", (req, res) => {
-    console.log(req.query.token)
     fs.readdir(path.join(__dirname, "/../templates"),
         { withFileTypes: true },
         (err, filesP) => {
@@ -71,7 +70,6 @@ router.get("/edit/:param", (req, res) => {
                             if (err) {
                                 console.log(err.message)
                             } else {
-                                console.log(typeof files)
                                 let file = []
                                 files.forEach(elem => {
                                     file.push(elem)

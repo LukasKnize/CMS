@@ -62,6 +62,9 @@ router.get('/:urlParameter', async (req, res) => {
         if (page == null) {
             res.sendStatus(404)
         } else {
+            if (req.get("origin") != "http://localhost:8080" || req.get("origin") != "http://localhost:5500") {
+                Page.findOneAndUpdate({url: req.params.urlParameter}, { $inc: {visited: 1}}).exec()
+            }
             res.send(page.toJSON())
         }
 })
