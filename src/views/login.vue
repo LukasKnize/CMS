@@ -55,6 +55,7 @@
 import { useSettingsStore } from "@/stores/settingsPre.js";
 import { reactive, computed } from "@vue/reactivity";
 import { useColorStore } from "@/stores/colorPalete.js";
+import router from "@/router";
 
 let settingsStore = useSettingsStore();
 let colorStore = useColorStore();
@@ -132,6 +133,7 @@ function login(e) {
             }else{
                 settingsStore.$patch((state) => {
                 state.token = token.token;
+                router.push("/")
             });
             }
             

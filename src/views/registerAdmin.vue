@@ -1,16 +1,7 @@
 <template>
     <div class="Container">
         <q-form @submit="onSubmit" class="q-gutter-md">
-            <q-select
-                filled
-                v-model="data.accountType"
-                :options="accountTypes"
-                label="Type of account"
-                :bg-color="colors.qgrey"
-                :color="colors.qtext"
-                :label-color="colors.qtext"
-            />
-
+            <h2>Register first administrator</h2>
             <q-input
                 filled
                 v-model="data.email"
@@ -85,6 +76,9 @@ import { reactive, computed } from "@vue/reactivity";
 import { useUserStore } from "@/stores/user.js";
 import { useSettingsStore } from "@/stores/settingsPre.js";
 import { useColorStore } from "@/stores/colorPalete.js";
+import router from "@/router";
+import { useRoute } from 'vue-router'
+const route = useRoute()
 
 let userStore = useUserStore();
 let settingsStore = useSettingsStore();
@@ -104,10 +98,8 @@ let data = reactive({
     email: "",
     pass: "",
     passV: "",
-    accountType: "",
+    accountType: "admin",
 });
-
-let accountTypes = ["admin", "editor"];
 
 let pasRegEx = new RegExp(
     /^((?=\S*?[A-Z])(?=\S*?[a-z])(?=\S*?[0-9]).{12,})\S$/
@@ -137,14 +129,23 @@ function createUser(e) {
             type: data.accountType,
             password: data.pass,
         };
+        console.log(route.query.token)
         fetch("http://localhost:5500/auth/signUp/", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "authorization": settingsStore.token
+                "authorization": route.query.token
             },
             body: JSON.stringify(userData),
         }).then((resp) => {
+            resp.json().then((token) => {
+                if (token.token != undefined) {
+                    settingsStore.$patch((state) => {
+                        state.token = token.token;
+                    });
+                    router.push("/")
+                }
+            });
         });
     }
 }
@@ -201,6 +202,10 @@ let colors = computed(() => {
     width: 500px;
     margin-left: auto;
     margin-right: auto;
+}
+
+h2 {
+    color: v-bind("colors.text") !important;
 }
 
 @media (max-width: 550px) {

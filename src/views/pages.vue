@@ -23,10 +23,11 @@
 
         <q-card
             class="my-card addCard"
-            :class="'bg-' + colors.qgrey + ' ' + 'text-' + colors.qtext"
+            :class="'bg-' + colors.qgrey + ' ' + 'text-' + colors.qtext" @click="addPage"
         >
             <q-icon name="add_circle" color="primary" size="xl" />
         </q-card>
+        
     </div>
 </template>
 
@@ -35,6 +36,7 @@
 import { useSettingsStore } from "@/stores/settingsPre.js";
 import { reactive, computed, ref } from "vue";
 import { useColorStore } from "@/stores/colorPalete.js";
+import router from "@/router";
 
 let pages = reactive({ page: "" });
 
@@ -91,7 +93,7 @@ function getPages() {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
-            authorization: settingsStore.token,
+            "authorization": settingsStore.token,
         },
     }).then((resp) => {
         resp.json().then((data) => {
@@ -101,6 +103,11 @@ function getPages() {
 }
 
 getPages();
+
+function addPage(){
+    console.log('sd')
+    router.push("/newPage")
+}
 
 function editPage(id){
     window.location.href = "http://localhost:5500/template/edit/" + data.template + "?token=" + settingsStore.token + "&id=" + id
@@ -132,6 +139,7 @@ function editPage(id){
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: pointer;
 }
 
 .addCard:hover {

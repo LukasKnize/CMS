@@ -4,14 +4,17 @@ import { useColorStore } from "@/stores/colorPalete.js";
 import { useSettingsStore } from "@/stores/settingsPre.js";
 import { useUserStore } from "@/stores/user.js";
 import router from "@/router";
+import {useRoute} from 'vue-router'
 import { reactive, ref } from "@vue/reactivity";
-import { onMounted } from "@vue/runtime-core";
+import { onMounted, watch } from "@vue/runtime-core";
 
 let menu = ref(null);
+let userMenu = ref(null)
 let animComponent = ref(null);
 let comp = reactive({ component: "" });
 onMounted(() => {
     menu = menu.value;
+    userMenu = userMenu.value
     animComponent = animComponent.value;
 });
 
@@ -73,7 +76,7 @@ let colors = computed(() => {
     if (settingsStore.mode == "Dark") {
         return {
             base: colorStore.dark.base,
-            gray: colorStore.dark.gray,
+            grey: colorStore.dark.gray,
             color: colorStore.dark.color,
             darkColor: colorStore.dark.darkColor,
             text: colorStore.dark.text,
@@ -86,7 +89,7 @@ let colors = computed(() => {
     } else if (settingsStore.mode == "Light") {
         return {
             base: colorStore.light.base,
-            gray: colorStore.light.gray,
+            grey: colorStore.light.gray,
             color: colorStore.light.color,
             qcolor: colorStore.light.qcolor,
             darkColor: colorStore.light.darkColor,
@@ -101,7 +104,7 @@ let colors = computed(() => {
     return {
         qbase: "blue",
         base: "#ecf0f1",
-        gray: "#bdc3c7",
+        grey: "#bdc3c7",
         qgrey: "grey-3",
         color: "#3498db",
         darkColor: "#2980b9",
@@ -112,11 +115,45 @@ let colors = computed(() => {
     };
 });
 
-setInterval(() => {
-    if (settingsStore.token == "") {
-        router.push("logIn")
+let route=useRoute();
+
+async function tokenCheck () {
+    console.log("checked")
+    if (settingsStore.token == "" && route.path != "'/logIn" && route.path != "/adminRegistration") {
+        
+        let resp = fetch("http://localhost:5500/users", {
+            method: "GET",
+            headers:{
+                "Content-Type": "application/json"
+            }
+        })
+        resp = await (await resp).json()
+        console.log(resp)
+        if(resp.message == "no users"){
+            console.log(resp.token)
+            router.push({path: "/adminRegistration", query: {token:  resp.token}})
+        }else{
+            router.push("logIn")
+        }
+        
     }
-}, 1000)
+}
+
+tokenCheck()
+
+watch(route, () => {
+    tokenCheck()
+})
+
+function logout(){
+    settingsStore.token = ""
+    router.push("logIn")
+    accountMenu()
+}
+
+function accountMenu(){
+    userMenu.classList.toggle("displayBlock")
+}
 </script>
 
 <template>
@@ -152,12 +189,16 @@ setInterval(() => {
                         round
                         dense
                         icon="account_circle"
-                        @click="changePages('login')"
+                        @click="accountMenu"
                     />
                 </q-toolbar>
             </q-header>
         </q-layout>
         <div class="contentContainer">
+            <div class="accountMenu" ref="userMenu">
+            <button><q-icon name="settings" /> account settings</button>
+            <button @click="logout"><q-icon name="logout" /> log out</button>
+        </div>
             <div class="sideMenuPanelBackdrop" ref="menu" @click="menuToggle">
                 <div
                     style="width: 250px; height: calc(100vh - 50px)"
@@ -324,6 +365,34 @@ animation: slideIn 0.6s ease-in-out forwards;
 .contentContainer {
     width: 100%;
     display: flex;
+}
+
+.accountMenu{
+    display: none;
+    height: 100px;
+    width: 200px;
+    background-color: antiquewhite;
+    position: absolute;
+    top: 50px;
+    right: 0;
+    z-index: 100;
+}
+
+.accountMenu button{
+    height: 50px;
+    width: 200px;
+    list-style-type: none;
+    border: none;
+    background-color: v-bind("colors.darkColor") !important;
+    color: v-bind("colors.text") !important;
+}
+
+.accountMenu button:hover{
+    background-color: v-bind("colors.color") !important;
+}
+
+.displayBlock{
+    display: block;
 }
 
 @keyframes slideIn {

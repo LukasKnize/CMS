@@ -2,10 +2,12 @@
     <div class="Container">
         <q-card
             class="my-card"
-            :class="'bg-' + colors.qgrey + ' ' + 'text-' + colors.qtext" v-for="(template, index) in templates.templates" :key="index"
+            :class="'bg-' + colors.qgrey + ' ' + 'text-' + colors.qtext"
+            v-for="(template, index) in templates.templates"
+            :key="index"
         >
             <q-card-section>
-                <div class="text-h6 q-mb-xs">{{template.name}}</div>
+                <div class="text-h6 q-mb-xs">{{ template.name }}</div>
             </q-card-section>
 
             <img :src="'http://localhost:5500/' + template.img" />
@@ -37,7 +39,7 @@ import { useColorStore } from "@/stores/colorPalete.js";
 let settingsStore = useSettingsStore();
 let colorStore = useColorStore();
 
-let templates = reactive({templates: ""})
+let templates = reactive({ templates: "" });
 
 let colors = computed(() => {
     colorStore = useColorStore();
@@ -85,17 +87,20 @@ let colors = computed(() => {
 });
 
 function addTemplate() {
-  let input = document.createElement("input");
+    let input = document.createElement("input");
     input.type = "file";
     input.name = "template";
     input.accept = ".zip";
 
     input.onchange = (e) => {
         let file = e.target.files[0];
-        let data = new FormData()
-        data.append("template", file)
+        let data = new FormData();
+        data.append("template", file);
         fetch("http://localhost:5500/template", {
             method: "POST",
+            headers: {
+                authorization: settingsStore.token,
+            },
             body: data,
         }).then((resp) => {
             console.log(resp);
@@ -106,16 +111,16 @@ function addTemplate() {
 }
 
 fetch("http://localhost:5500/template/all", {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            authorization: settingsStore.token,
-        },
-    }).then((resp) => {
-        resp.json().then((data) => {
-            templates.templates = data .templates;
-        });
+    method: "GET",
+    headers: {
+        "Content-Type": "application/json",
+        authorization: settingsStore.token,
+    },
+}).then((resp) => {
+    resp.json().then((data) => {
+        templates.templates = data.templates;
     });
+});
 </script>
 
 <style scoped>
@@ -148,7 +153,7 @@ fetch("http://localhost:5500/template/all", {
 }
 
 .q-card > img {
-max-height: 170px;
+    max-height: 170px;
 }
 
 @media (max-width: 1000px) {
