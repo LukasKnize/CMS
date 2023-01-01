@@ -24,16 +24,16 @@ api.use(express.json())
 ui.use(express.static(path.join(__dirname, "public")))
 api.use(express.static(path.join(__dirname, "uploads")))
 api.use(express.static(path.join(__dirname, "templates")))
-// sendFile will go here
 
 const authRouter = require('./routes/auth')
 const pageRouter = require('./routes/pages')
-const templateRouter = require("./routes/template");
-const { use } = require('./routes/auth');
+const templateRouter = require("./routes/template")
+const userRouter = require("./routes/users")
 
 api.use('/auth', authRouter)
 api.use('/pages', pageRouter)
 api.use('/template', templateRouter)
+api.use('/users', userRouter)
 
 ui.listen(uiPort);
 console.log('UI Server started at http://localhost:' + uiPort);

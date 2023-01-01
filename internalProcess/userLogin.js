@@ -4,54 +4,56 @@ const mongoose = require('mongoose')
 const User = require('../dbSchemas/userShema')
 
 let login = async (data) => {
-    let db = await User.find({ email: data.email })
-    db = db[0].toJSON()
-    let index;
+    let db = await User.findOne({ email: data.email })
+    if (db != undefined) {
+        db = db.toJSON()
+        let index;
 
-    if (db == null) {
-        console.log("email doesn't exist")
-        return "email doesn't exist"
-    } else {
-    }
-
-    if (data.password != "" && data.password != null && data.password != undefined) {
-        //some code that takes salt from db 
-        let salt = db.salt
-        let peperArray = [
-            "A",
-            "B",
-            "C",
-            "D",
-            "E",
-            "F",
-            "G",
-            "H",
-            "I",
-            "J",
-            "K",
-            "L",
-            "M",
-            "N",
-            "O",
-            "P",
-            "Q",
-            "R",
-            "S",
-            "T",
-            "U",
-            "V",
-            "W",
-            "X",
-            "Y",
-            "Z",
-        ];
-        for (let i = 0; i < peperArray.length; i++) {
-            let result = await testPass(data.password, salt, peperArray[i])
-            if (result == db.password) {
-                return db.id
-            }
+        if (db == null) {
+            return "email doesn't exist"
+        } else {
         }
-        return "bad pass"
+
+        if (data.password != "" && data.password != null && data.password != undefined) {
+            let salt = db.salt
+            let peperArray = [
+                "A",
+                "B",
+                "C",
+                "D",
+                "E",
+                "F",
+                "G",
+                "H",
+                "I",
+                "J",
+                "K",
+                "L",
+                "M",
+                "N",
+                "O",
+                "P",
+                "Q",
+                "R",
+                "S",
+                "T",
+                "U",
+                "V",
+                "W",
+                "X",
+                "Y",
+                "Z",
+            ];
+            for (let i = 0; i < peperArray.length; i++) {
+                let result = await testPass(data.password, salt, peperArray[i])
+                if (result == db.password) {
+                    return db.id
+                }
+            }
+            return "bad pass"
+        }
+    }else {
+        return "bad email"
     }
 }
 

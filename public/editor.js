@@ -88,7 +88,4 @@ async function save() {
             "content": editedData,
         }),
     });
-
-    console.log(await resp);
-    //console.log(editedData)
 }

@@ -44,7 +44,6 @@ router.post("/", async (req, res) => {
             res.status(201).send({ message: "crated", id: id })
         }
     } catch (error) {
-        console.log(error)
         res.sendStatus(403)
     }
 })
@@ -59,7 +58,7 @@ router.post('/data/:urlParameter', async (req, res) => {
 
 router.get('/:urlParameter', async (req, res) => {
     let page = await Page.findOne({url: req.params.urlParameter})
-        if (page == null) {
+        if (page == undefined) {
             res.sendStatus(404)
         } else {
             if (req.get("origin") != "http://localhost:8080" || req.get("origin") != "http://localhost:5500") {
@@ -67,6 +66,25 @@ router.get('/:urlParameter', async (req, res) => {
             }
             res.send(page.toJSON())
         }
+})
+
+router.delete("/:urlParameter",  async (req, res) => {
+    let page = await Page.findOne({url: req.params.urlParameter})
+    if (page != undefined) {
+        try {
+        const token = req.headers['authorization']
+        let parsedToken = jwt.verify(token, process.env.SECRET)
+        if(parsedToken.type == "admin" || parsedToken.id == page.author){
+            await Page.deleteOne({url: req.params.urlParameter})
+            res.sendStatus(200)
+        }else{
+            res.sendStatus(403)
+        }
+    } catch (error) {
+        res.sendStatus(500)
+    }
+    }
+    
 })
 
 module.exports = router

@@ -21,23 +21,26 @@ let storage = multer.diskStorage({
 let upload = multer({ storage: storage });
 
 router.post("/", upload.single('template'), (req, res) => {
-    let delFile
-    if (req.file) {
+    try {
+        const token = req.headers['authorization']
+        let parsedToken = jwt.verify(token, process.env.SECRET)
+        if (parsedToken.type == "admin") {
+            if (req.file) {
 
-        let filepath = path.join(req.file.destination, req.file.filename);
-        fs.createReadStream(filepath).pipe(unzipper.Extract({ path: path.join(__dirname, "/../templates") })).on("close", () => {
-            fs.unlinkSync(filepath)
-        })
-        let templateDir = fs.readdirSync(path.join(__dirname, "/../templates"))
-        delFile = filepath
+                let filepath = path.join(req.file.destination, req.file.filename);
+                fs.createReadStream(filepath).pipe(unzipper.Extract({ path: path.join(__dirname, "/../templates") })).on("close", () => {
+                    fs.unlinkSync(filepath)
+                })
+            }
+            res.sendStatus(200)
+        }else{
+            res.sendStatus(403)
+        }
+    } catch (error) {
+        res.sendStatus(500)
     }
-    res.sendStatus(200)
-    //removeFile(delFile)
+    
 })
-
-function removeFile(path) {
-    fs.unlinkSync(path)
-}
 
 router.get("/all", (req, res) => {
     let templates = []
@@ -68,7 +71,6 @@ router.get("/edit/:param", (req, res) => {
                         { withFileTypes: true },
                         (err, files) => {
                             if (err) {
-                                console.log(err.message)
                             } else {
                                 let file = []
                                 files.forEach(elem => {

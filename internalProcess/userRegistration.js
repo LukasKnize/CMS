@@ -7,14 +7,6 @@ let signup = async (data) => {
     let pasRegEx = new RegExp(/^((?=\S*?[A-Z])(?=\S*?[a-z])(?=\S*?[0-9]).{12,})\S$/);
     let emRegEx = RegExp(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/);
 
-/*     for (let i = 0; i < db.users.length; i++) {
-        if (db.users[i].username == data.username) {
-            return "Username is alredy taken"
-        } else if (db.users[i].email == data.email) {
-            return "Email is alredy being usen"
-        }
-    } */
-
     if (pasRegEx.test(data.password) && emRegEx.test(data.email)) {
         let hashedPass = await hashPassword(data.password)
         let saveData = {
@@ -43,25 +35,6 @@ let signup = async (data) => {
 
         await user.save()
 
-        /* fs.readFile('./db.json', 'utf8', function (err, data) {
-            if (err) {
-                console.log(err)
-            } else {
-                const file = JSON.parse(data);
-                file.users.push(saveData)
-
-                const json = JSON.stringify(file);
-
-                fs.writeFile('./db.json', json, 'utf8', function (err) {
-                    if (err) {
-                        console.log(err);
-                    } else {
-                        //Everything went OK!
-                    }
-                });
-            }
-
-        }); */
         return ["ok", saveData.id]
     } else {
         return "bad request"

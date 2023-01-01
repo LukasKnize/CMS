@@ -26,7 +26,6 @@ fetch("http://localhost:5500/pages/" + address, {
     }
 }).then((resp) => {
     resp.json().then((resp) => {
-        console.log(resp.content)
         data = resp.content
         displayData()
     })
