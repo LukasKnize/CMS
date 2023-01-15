@@ -8,9 +8,11 @@ const User = require('./dbSchemas/userShema')
 mongoose.connect("mongodb://localhost:27017/CMS")
 
 const ui = express();
-const api = express()
+const api = express();
+const page = express();
 const uiPort = process.env.UIPORT || 8080;
 const apiPort = process.env.APIPORT || 5500;
+const pagePort = process.env.PAGEPORT || 3000;
 ui.use(history());
 
 api.use(cors())
@@ -24,19 +26,25 @@ api.use(express.json())
 ui.use(express.static(path.join(__dirname, "public")))
 api.use(express.static(path.join(__dirname, "uploads")))
 api.use(express.static(path.join(__dirname, "templates")))
+page.use(express.static(path.join(__dirname, "pages")))
 
 const authRouter = require('./routes/auth')
-const pageRouter = require('./routes/pages')
+const pagesRouter = require('./routes/pages')
 const templateRouter = require("./routes/template")
 const userRouter = require("./routes/users")
+const pageRouter = require("./routes/page")
 
 api.use('/auth', authRouter)
-api.use('/pages', pageRouter)
+api.use('/pages', pagesRouter)
 api.use('/template', templateRouter)
 api.use('/users', userRouter)
+page.use('/', pageRouter)
 
 ui.listen(uiPort);
 console.log('UI Server started at http://localhost:' + uiPort);
 
 api.listen(apiPort)
 console.log('API Server started at http://localhost:' + apiPort);
+
+page.listen(pagePort)
+console.log('API Server started at http://localhost:' + pagePort);

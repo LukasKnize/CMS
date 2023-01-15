@@ -4,7 +4,7 @@
   "description": "Backend for cms",
   "main": "app.js",
   "scripts": {
-    "devStart": "nodemon server.js --ignore db.json --ignore templates/"
+    "devStart": "nodemon server.js --ignore db.json --ignore templates/ --ignore pages/"
   },
   "keywords": [
     "cms"

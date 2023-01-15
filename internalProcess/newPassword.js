@@ -1,7 +1,14 @@
 const { subtle } = require('crypto').webcrypto;
 
 let hashPassword = async (pass) => {
-    let salt = require('crypto').randomBytes(32).toString('hex');
+    let saltCharSet =
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let salt = "";
+    for (let i = 0; i < 32; i++) {
+        salt += saltCharSet.charAt(
+            Math.floor(Math.random() * saltCharSet.length)
+        );
+    }
 
     let peperArray = [
         "A",

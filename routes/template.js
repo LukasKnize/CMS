@@ -79,6 +79,8 @@ router.get("/edit/:param", (req, res) => {
                                 for (let j = 0; j < file.length; j++) {
                                     if (file[j].name.includes('.html')) {
                                         let dom = new JSDOM(fs.readFileSync(path.join(__dirname, "/../templates", filesP[i].name, file[j].name)))
+                                        let comment = dom.window.document.createComment("Code injected by CMS")
+                                        dom.window.document.body.appendChild(comment)
                                         let script = dom.window.document.createElement("script")
                                         script.src = 'http://localhost:8080/editor.js'
                                         dom.window.document.body.appendChild(script)

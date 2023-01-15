@@ -1,9 +1,10 @@
 const params = new Proxy(new URLSearchParams(window.location.search), {
     get: (searchParams, prop) => searchParams.get(prop),
-  });
-  let token = params.token
-  let pageId = params.id
-  
+});
+let token = params.token
+let pageId = params.id
+let saveParam = params.save
+
 let items = document.body.getElementsByTagName("*")
 
 class data {
@@ -53,6 +54,8 @@ saveButton.style.border = "none"
 saveButton.innerText = "Save"
 saveButton.setAttribute("onclick", "save()")
 document.body.appendChild(saveButton)
+let comment = document.createComment("Code injected by CMS")
+document.body.appendChild(comment)
 
 function addLink(id) {
     let link = prompt("Anchor adress")
@@ -65,27 +68,45 @@ function addLink(id) {
 }
 
 async function save() {
-    let saveItems = document.body.getElementsByTagName("*")
-    for (let i = 0, len = saveItems.length; i < len; i++) {
-        if (items[i].tagName == "P" || items[i].tagName == "H1" || items[i].tagName == "H2" || items[i].tagName == "H3" || items[i].tagName == "H4" || items[i].tagName == "H5" || items[i].tagName == "H6" || items[i].tagName == "BUTTON" || items[i].tagName == "A") {
-            id = items[i].getAttribute("data-elemID")
-            for (let j = 0; j < editedData.length; j++) {
-                if (editedData[j].id == id) {
-                    editedData[j].text = items[i].innerText
-                    break
+    if (saveParam) {
+        let doc = document.documentElement.innerHTML
+        let regex = /(?<=<!--Code injected by CMS-->)(.*)(?=<!--Code injected by CMS-->)/
+        doc = doc.replace(regex, "")
+        doc = doc.replace("<!--Code injected by CMS--><!--Code injected by CMS-->", "")
+        const resp = fetch("http://localhost:5500/pages/save/data/" + pageId, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "authorization": token
+            },
+            body: JSON.stringify({
+                "data": "<!DOCTYPE html> <html>" + doc + "</html>",
+            }),
+        });
+    } else {
+        let saveItems = document.body.getElementsByTagName("*")
+        for (let i = 0, len = saveItems.length; i < len; i++) {
+            if (items[i].tagName == "P" || items[i].tagName == "H1" || items[i].tagName == "H2" || items[i].tagName == "H3" || items[i].tagName == "H4" || items[i].tagName == "H5" || items[i].tagName == "H6" || items[i].tagName == "BUTTON" || items[i].tagName == "A") {
+                id = items[i].getAttribute("data-elemID")
+                for (let j = 0; j < editedData.length; j++) {
+                    if (editedData[j].id == id) {
+                        editedData[j].text = items[i].innerText
+                        break
+                    }
                 }
             }
         }
+
+        const resp = fetch("http://localhost:5500/pages/data/" + pageId, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "authorization": token
+            },
+            body: JSON.stringify({
+                "content": editedData,
+            }),
+        });
     }
 
-    const resp = fetch("http://localhost:5500/pages/data/" + pageId, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "authorization": token
-        },
-        body: JSON.stringify({
-            "content": editedData,
-        }),
-    });
 }
