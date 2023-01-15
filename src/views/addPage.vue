@@ -54,6 +54,12 @@
                 :label-color="colors.qtext"
             />
 
+            <q-toggle
+                v-model="data.save"
+                label="Use API"
+                :class="'text-' + colors.qtext"
+            />
+
             <q-btn label="Submit" type="submit" :color="colors.qbase" @click="createPage" />
         </q-form>
     </div>
@@ -118,6 +124,7 @@ let data = reactive({
     url: "",
     desc: "",
     template: "",
+    save: false
 });
 let options = reactive({ templates: "" });
 
@@ -140,7 +147,8 @@ fetch("http://localhost:5500/template/all", {
 
 function createPage(e) {
     e.preventDefault()
-    fetch("http://localhost:5500/pages/", {
+    if (data.save) {
+      fetch("http://localhost:5500/pages/", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -149,9 +157,24 @@ function createPage(e) {
         body: JSON.stringify(data),
     }).then((resp) => {
         resp.json().then((dataresp) => {
-            window.location.href = "http://localhost:5500/template/edit/" + data.template + "?token=" + settingsStore.token + "&id=" + dataresp.id
+            window.location.href = "http://localhost:5500/template/edit/" + data.template + "?token=" + settingsStore.token + "&id=" + dataresp.id + "&save=false"
         });
-    });
+    });  
+    }else{
+        fetch("http://localhost:5500/pages/save", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            authorization: settingsStore.token,
+        },
+        body: JSON.stringify(data),
+    }).then((resp) => {
+        resp.json().then((dataresp) => {
+            window.location.href = "http://localhost:5500/template/edit/" + data.template + "?token=" + settingsStore.token + "&id=" + data.url + "&save=true"
+        });
+    }); 
+    }
+    
 }
 </script>
 
