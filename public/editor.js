@@ -38,6 +38,26 @@ for (let i = 0, len = items.length; i < len; i++) {
         editedData.push(new data(id))
         items[i].setAttribute("contenteditable", "true")
         items[i].setAttribute("data-elemID", id)
+    } else if (items[i].tagName == "IMG") {
+        let id = "elemID" + i
+        editedData.push(new data(id))
+        items[i].setAttribute("data-elemID", id)
+        items[i].addEventListener("click", () => {
+            let inp = document.createElement("input")
+            inp.accept = "image/jpeg, image/png, image/jpg, image/webp"
+            inp.type = "file"
+            inp.click()
+
+            inp.addEventListener("change", () => {
+                let file = inp.files
+                items[i].src = URL.createObjectURL(file[0])
+                for (let j = 0; j < editedData.length; j++) {
+                    if (editedData[j].id == id) {
+                        editedData[j].file = file[0]
+                    }
+                }
+            })
+        })
     }
 }
 
@@ -57,14 +77,82 @@ document.body.appendChild(saveButton)
 let comment = document.createComment("Code injected by CMS")
 document.body.appendChild(comment)
 
-function addLink(id) {
-    let link = prompt("Anchor adress")
-    for (let i = 0; i < editedData.length; i++) {
-        if (editedData[i].id == id) {
-            editedData[i].url = link
-            break
+function addLink(id, item) {
+    let backdrop = document.createElement("div")
+    backdrop.style.backgroundColor = "#0000005a"
+    backdrop.style.position = "fixed"
+    backdrop.style.left = 0
+    backdrop.style.top = 0
+    backdrop.style.width = "100%"
+    backdrop.style.height = "100vh"
+    backdrop.style.display = "flex"
+    backdrop.style.justifyContent = "center"
+    backdrop.style.alignItems = "center"
+    backdrop.style.fontFamily = "Arial, Helvetica, sans-serif"
+    backdrop.style.zIndex = 9999
+
+    let form = document.createElement("div")
+    form.style.width = "500px"
+    form.style.height = "250px"
+    form.style.backgroundColor = "#1976d2"
+    form.style.display = "flex"
+    form.style.flexDirection = "column"
+    form.style.color = "white"
+    form.style.justifyContent = "center"
+    form.style.alignItems = "center"
+    form.style.borderRadius = "15px"
+
+    let p1 = document.createElement("p")
+    p1.style.fontSize = "1.1em"
+    p1.style.padding = "10px 0"
+    p1.innerHTML = "Text"
+
+    let p2 = document.createElement("p")
+    p2.style.fontSize = "1.1em"
+    p2.style.padding = "10px 0"
+    p2.innerHTML = "url or anchor"
+
+    let input1 = document.createElement("input")
+    input1.style.width = "300px"
+    input1.id = "CMSINPUT1"
+
+    let input2 = document.createElement("input")
+    input2.style.width = "300px"
+    input2.id = "CMSINPUT2"
+
+    let button = document.createElement("button")
+    button.style.width = "150px"
+    button.style.backgroundColor = "white"
+    button.style.color = "#1976d2"
+    button.style.border = "none"
+    button.style.padding = "10px 0"
+    button.style.marginTop = "10px"
+    button.innerHTML = "OK"
+
+    button.addEventListener("click", () => {
+        console.log("ok " + id)
+        for (let i = 0; i < editedData.length; i++) {
+            if (editedData[i].id == id) {
+                editedData[i].url = document.getElementById("CMSINPUT2").value
+                editedData[i].text = document.getElementById("CMSINPUT1").value
+                document.querySelector('[data-elemid="' + id + '"]').innerHTML = document.getElementById("CMSINPUT1").value
+                break
+            }
         }
-    }
+        backdrop.remove()
+    })
+
+    form.appendChild(p1)
+    form.appendChild(input1)
+    form.appendChild(p2)
+    form.appendChild(input2)
+    form.appendChild(button)
+    backdrop.appendChild(form)
+    document.body.appendChild(backdrop)
+    input1.focus()
+
+
+    return false
 }
 
 async function save() {
@@ -85,6 +173,8 @@ async function save() {
         });
     } else {
         let saveItems = document.body.getElementsByTagName("*")
+        let files = []
+        let indexes = []
         for (let i = 0, len = saveItems.length; i < len; i++) {
             if (items[i].tagName == "P" || items[i].tagName == "H1" || items[i].tagName == "H2" || items[i].tagName == "H3" || items[i].tagName == "H4" || items[i].tagName == "H5" || items[i].tagName == "H6" || items[i].tagName == "BUTTON" || items[i].tagName == "A") {
                 id = items[i].getAttribute("data-elemID")
@@ -94,19 +184,61 @@ async function save() {
                         break
                     }
                 }
+            } else if (items[i].tagName == "IMG") {
+                for (let j = 0; j < editedData.length; j++) {
+                    if (editedData[j].id == id) {
+                        files.push(editedData[j].file)
+                        indexes.push(j)
+                        break
+                    }
+                }
             }
         }
 
-        const resp = fetch("http://localhost:5500/pages/data/" + pageId, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "authorization": token
-            },
-            body: JSON.stringify({
-                "content": editedData,
-            }),
-        });
+        if (files.length > 0) {
+            let data = new FormData()
+            files.forEach(item => {
+                data.append('files[]', item, item.name)
+            })
+
+            fetch("http://localhost:5500/upload", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "authorization": token
+                },
+                body: data
+            }).then(resp => {
+                resp = JSON.parse(resp)
+                if (resp.urls == undefined) {
+                    for (let k = 0; k < resp.urls.length; k++) {
+                        editedData[indexes[k]].src = resp.urls[k]
+                    }
+                }
+            }).then(() => {
+                const resp = fetch("http://localhost:5500/pages/data/" + pageId, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "authorization": token
+                    },
+                    body: JSON.stringify({
+                        "content": editedData,
+                    }),
+                });
+            })
+        } else {
+            const resp = fetch("http://localhost:5500/pages/data/" + pageId, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "authorization": token
+                },
+                body: JSON.stringify({
+                    "content": editedData,
+                }),
+            });
+        }
     }
 
 }
