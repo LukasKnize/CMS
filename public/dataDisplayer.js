@@ -7,7 +7,7 @@ let data
 let items = document.body.getElementsByTagName("*")
 
 function displayData(){
-    for (let i = 0, len = items.length; i < len; i++) {
+    for (let i = 0; i < items.length; i++) {
         if (items[i].tagName == "P" || items[i].tagName == "H1" || items[i].tagName == "H2" || items[i].tagName == "H3" || items[i].tagName == "H4" || items[i].tagName == "H5" || items[i].tagName == "H6") {
             items[i].innerHTML = data[i].text
         } else if (items[i].tagName == "A") {
@@ -15,6 +15,8 @@ function displayData(){
             items[i].href = data[i].url
         } else if (items[i].tagName == "BUTTON") {
             items[i].innerHTML = data[i].text
+        }else if(items[i].tagName == "IMG"){
+            items[i].src = data[i].src
         }
     }
 }

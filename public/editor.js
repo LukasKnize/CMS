@@ -7,6 +7,39 @@ let saveParam = params.save
 
 let items = document.body.getElementsByTagName("*")
 
+let apidata
+
+function displayData() {
+    for (let i = 0; i < items.length; i++) {
+        if (items[i].tagName == "P" || items[i].tagName == "H1" || items[i].tagName == "H2" || items[i].tagName == "H3" || items[i].tagName == "H4" || items[i].tagName == "H5" || items[i].tagName == "H6") {
+            items[i].innerHTML = apidata[i].text
+        } else if (items[i].tagName == "A") {
+            items[i].innerHTML = apidata[i].text
+            items[i].href = apidata[i].url
+        } else if (items[i].tagName == "BUTTON" && items[i].classList != "CMSSaveBUTTON") {
+            items[i].innerHTML = apidata[i].text
+        }else if(items[i].tagName == "IMG"){
+            items[i].src = apidata[i].src
+        }
+    }
+}
+
+fetch("http://localhost:5500/pages/id/" + pageId, {
+    method: "GET",
+    headers: {
+        "Content-Type": "application/json",
+    }
+}).then((resp) => {
+    resp.json().then((resp) => {
+        apidata = resp.content
+
+        if (apidata.length > 0) {
+            displayData()
+        }
+    })
+})
+
+
 class data {
     constructor(id) {
         this.id = id;
@@ -34,6 +67,7 @@ for (let i = 0, len = items.length; i < len; i++) {
         let old_element = items[i]
         let new_element = old_element.cloneNode(true)
         old_element.parentNode.replaceChild(new_element, old_element)
+        console.log(old_element)
         let id = "elemID" + i
         editedData.push(new data(id))
         items[i].setAttribute("contenteditable", "true")
@@ -72,6 +106,7 @@ saveButton.style.backgroundColor = "#1976d2"
 saveButton.style.color = "white"
 saveButton.style.border = "none"
 saveButton.innerText = "Save"
+saveButton.classList = "CMSSaveBUTTON"
 saveButton.setAttribute("onclick", "save()")
 document.body.appendChild(saveButton)
 let comment = document.createComment("Code injected by CMS")
@@ -156,7 +191,7 @@ function addLink(id, item) {
 }
 
 async function save() {
-    if (saveParam) {
+    if (saveParam == "true") {
         let doc = document.documentElement.innerHTML
         let regex = /(?<=<!--Code injected by CMS-->)(.*)(?=<!--Code injected by CMS-->)/
         doc = doc.replace(regex, "")
@@ -171,9 +206,15 @@ async function save() {
                 "data": "<!DOCTYPE html> <html>" + doc + "</html>",
             }),
         });
+
+        resp.then(resp => {
+            if (resp.status == 201) {
+                //history.back(-1)
+            }
+        })
     } else {
         let saveItems = document.body.getElementsByTagName("*")
-        let files = []
+        let data = new FormData()
         let indexes = []
         for (let i = 0, len = saveItems.length; i < len; i++) {
             if (items[i].tagName == "P" || items[i].tagName == "H1" || items[i].tagName == "H2" || items[i].tagName == "H3" || items[i].tagName == "H4" || items[i].tagName == "H5" || items[i].tagName == "H6" || items[i].tagName == "BUTTON" || items[i].tagName == "A") {
@@ -185,49 +226,60 @@ async function save() {
                     }
                 }
             } else if (items[i].tagName == "IMG") {
+                id = items[i].getAttribute("data-elemID")
                 for (let j = 0; j < editedData.length; j++) {
                     if (editedData[j].id == id) {
-                        files.push(editedData[j].file)
-                        indexes.push(j)
-                        break
+                        if (editedData[j].file != undefined) {
+                            data.append('files[]', editedData[j].file, id + "-" + editedData[j].file.name)
+                            console.log(editedData[j].file.name)
+                            console.log(data)
+                            indexes.push(j)
+                            break
+                        }
+
                     }
                 }
             }
         }
 
-        if (files.length > 0) {
-            let data = new FormData()
-            files.forEach(item => {
-                data.append('files[]', item, item.name)
-            })
-
+        if (data.getAll('files[]').length > 0) {
             fetch("http://localhost:5500/upload", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json",
                     "authorization": token
                 },
                 body: data
             }).then(resp => {
-                resp = JSON.parse(resp)
-                if (resp.urls == undefined) {
-                    for (let k = 0; k < resp.urls.length; k++) {
-                        editedData[indexes[k]].src = resp.urls[k]
+                console.log(resp)
+                resp.json().then(resp => {
+                    if (resp.urls != undefined) {
+                        for (let k = 0; k < resp.urls.length; k++) {
+                            editedData[indexes[k]].src = resp.urls[k]
+                            delete editedData[indexes[k]].file
+                        }
                     }
-                }
-            }).then(() => {
-                const resp = fetch("http://localhost:5500/pages/data/" + pageId, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "authorization": token
-                    },
-                    body: JSON.stringify({
-                        "content": editedData,
-                    }),
-                });
+                }).then(() => {
+                    const resp = fetch("http://localhost:5500/pages/data/" + pageId, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "authorization": token
+                        },
+                        body: JSON.stringify({
+                            "content": editedData,
+                        }),
+                    });
+    
+                    resp.then(resp => {
+                        if (resp.status == 201) {
+                            //history.back(-1)
+                        }
+                    })
+                })
             })
         } else {
+            console.log("not ok")
+            setTimeout(() => { }, 1000)
             const resp = fetch("http://localhost:5500/pages/data/" + pageId, {
                 method: "POST",
                 headers: {
@@ -238,6 +290,12 @@ async function save() {
                     "content": editedData,
                 }),
             });
+
+            resp.then(resp => {
+                if (resp.status == 201) {
+                    //history.back(-1)
+                }
+            })
         }
     }
 

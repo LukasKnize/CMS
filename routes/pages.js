@@ -54,6 +54,7 @@ router.post('/data/:urlParameter', async (req, res) => {
     if (page != null) {
         page.content = req.body.content
         page.save()
+        res.sendStatus(201)
     }
 })
 
@@ -113,6 +114,18 @@ router.post("/save/data/:name", (req, res) => {
         res.sendStatus(201)
     } catch (error) {
         res.sendStatus(403)
+    }
+})
+
+router.get("/id/:pageId", async (req, res) => {
+    let page = await Page.findOne({ id: req.params.pageId })
+    if (page == undefined) {
+        res.sendStatus(404)
+    } else {
+        if (req.get("origin") != "http://localhost:8080" || req.get("origin") != "http://localhost:5500") {
+            Page.findOneAndUpdate({ url: req.params.urlParameter }, { $inc: { visited: 1 } }).exec()
+        }
+        res.send(page.toJSON())
     }
 })
 

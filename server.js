@@ -33,11 +33,13 @@ const pagesRouter = require('./routes/pages')
 const templateRouter = require("./routes/template")
 const userRouter = require("./routes/users")
 const pageRouter = require("./routes/page")
+const uploadRouter = require("./routes/upload")
 
 api.use('/auth', authRouter)
 api.use('/pages', pagesRouter)
 api.use('/template', templateRouter)
 api.use('/users', userRouter)
+api.use('/upload', uploadRouter)
 page.use('/', pageRouter)
 
 ui.listen(uiPort);
@@ -47,4 +49,4 @@ api.listen(apiPort)
 console.log('API Server started at http://localhost:' + apiPort);
 
 page.listen(pagePort)
-console.log('API Server started at http://localhost:' + pagePort);
+console.log('pages are served at http://localhost:' + pagePort);
