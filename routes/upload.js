@@ -19,11 +19,17 @@ let storage = multer.diskStorage({
 let upload = multer({ storage: storage });
 
 router.post("/", upload.array('files[]'), (req, res, next) => {
-    let response = []
-    for (let i = 0; i < req.files.length; i++) {
-        response.push("http://localhost:5500/" + req.files[i].filename)
+    try {
+        const token = req.headers['authorization']
+        let parsedToken = jwt.verify(token, process.env.SECRET)
+        let response = []
+        for (let i = 0; i < req.files.length; i++) {
+            response.push("http://localhost:5500/" + req.files[i].filename)
+        }
+        res.status(201).send({ urls: response })
+    } catch (error) {
+        res.sendStatus(403)
     }
-    res.status(201).send({urls: response})
 })
 
 module.exports = router

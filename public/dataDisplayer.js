@@ -21,7 +21,7 @@ function displayData(){
     }
 }
 
-fetch("http://localhost:5500/pages/" + address, {
+fetch("http://localhost:5500/pages/" + address.split("$-$")[0], {
     method: "GET",
     headers: {
         "Content-Type": "application/json",

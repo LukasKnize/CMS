@@ -18,13 +18,13 @@ function displayData() {
             items[i].href = apidata[i].url
         } else if (items[i].tagName == "BUTTON" && items[i].classList != "CMSSaveBUTTON") {
             items[i].innerHTML = apidata[i].text
-        }else if(items[i].tagName == "IMG"){
+        } else if (items[i].tagName == "IMG") {
             items[i].src = apidata[i].src
         }
     }
 }
 
-fetch("http://localhost:5500/pages/id/" + pageId, {
+fetch("http://localhost:5500/pages/id/" + pageId.split("$-$")[0], {
     method: "GET",
     headers: {
         "Content-Type": "application/json",
@@ -192,26 +192,88 @@ function addLink(id, item) {
 
 async function save() {
     if (saveParam == "true") {
-        let doc = document.documentElement.innerHTML
-        let regex = /(?<=<!--Code injected by CMS-->)(.*)(?=<!--Code injected by CMS-->)/
-        doc = doc.replace(regex, "")
-        doc = doc.replace("<!--Code injected by CMS--><!--Code injected by CMS-->", "")
-        const resp = fetch("http://localhost:5500/pages/save/data/" + pageId, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "authorization": token
-            },
-            body: JSON.stringify({
-                "data": "<!DOCTYPE html> <html>" + doc + "</html>",
-            }),
-        });
+        let splitedID = pageId.split("$-$")
+        document.title = splitedID[1]
+        if (document.querySelector('meta[name="description"]') == null) {
+            let meta = document.createElement('meta')
+            meta.name = "description"
+            meta.setAttribute("content", splitedID[2])
+            document.head.appendChild(meta)
+        } else {
+            document.querySelector('meta[name="description"]').setAttribute("content", splitedID[2]);
+        }
 
-        resp.then(resp => {
-            if (resp.status == 201) {
-                //history.back(-1)
+        if (document.querySelector('meta[name="cmsdata"]') == null) {
+            let meta = document.createElement('meta')
+            meta.name = "cmsdata"
+            meta.setAttribute("content", window.location.href.split("/").pop().split("?")[0])
+            document.head.appendChild(meta)
+        } else {
+            document.querySelector('meta[name="cmsdata"]').setAttribute("content", window.location.href.split("/").pop().split("?")[0]);
+        }
+
+        let saveItems = document.body.getElementsByTagName("*")
+        let data = new FormData()
+        let indexes = []
+        for (let i = 0, len = saveItems.length; i < len; i++) {
+            if (items[i].tagName == "IMG") {
+                id = items[i].getAttribute("data-elemID")
+                for (let j = 0; j < editedData.length; j++) {
+                    if (editedData[j].id == id) {
+                        if (editedData[j].file != undefined) {
+                            data.append('files[]', editedData[j].file, id + "-" + editedData[j].file.name)
+                            console.log(editedData[j].file.name)
+                            console.log(data)
+                            indexes.push(j)
+                            break
+                        }
+
+                    }
+                }
+            } else if (items[i].tagName == "P" || items[i].tagName == "H1" || items[i].tagName == "H2" || items[i].tagName == "H3" || items[i].tagName == "H4" || items[i].tagName == "H5" || items[i].tagName == "H6" || items[i].tagName == "BUTTON" || items[i].tagName == "A") {
+                items[i].removeAttribute("contenteditable")
             }
-        })
+        }
+        if (data.getAll('files[]').length > 0) {
+            fetch("http://localhost:5500/upload", {
+                method: "POST",
+                headers: {
+                    "authorization": token
+                },
+                body: data
+            }).then(resp => {
+                console.log(resp)
+                resp.json().then(resp => {
+                    if (resp.urls != undefined) {
+                        for (let k = 0; k < resp.urls.length; k++) {
+                            document.querySelector('[data-elemid=' + editedData[indexes[k]].id + ']').src = resp.urls[k]
+                        }
+                    }
+                }).then(() => {
+                    let doc = document.documentElement.innerHTML
+            let regex = /(?<=<!--Code injected by CMS-->)(.*)(?=<!--Code injected by CMS-->)/
+            doc = doc.replace(regex, "")
+            doc = doc.replace("<!--Code injected by CMS--><!--Code injected by CMS-->", "")
+            const resp = fetch("http://localhost:5500/pages/save/data/" + splitedID[0], {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "authorization": token
+                },
+                body: JSON.stringify({
+                    "data": "<!DOCTYPE html> <html>" + doc + "</html>",
+                    "name": splitedID[0]
+                }),
+            });
+
+            resp.then(resp => {
+                if (resp.status == 201) {
+                    history.back(-1)
+                }
+            })
+                })
+            })
+        }
     } else {
         let saveItems = document.body.getElementsByTagName("*")
         let data = new FormData()
@@ -269,10 +331,10 @@ async function save() {
                             "content": editedData,
                         }),
                     });
-    
+
                     resp.then(resp => {
                         if (resp.status == 201) {
-                            //history.back(-1)
+                            history.back(-1)
                         }
                     })
                 })
@@ -293,7 +355,7 @@ async function save() {
 
             resp.then(resp => {
                 if (resp.status == 201) {
-                    //history.back(-1)
+                    history.back(-1)
                 }
             })
         }

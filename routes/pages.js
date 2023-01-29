@@ -6,6 +6,8 @@ const fs = require('fs')
 const jwt = require("jsonwebtoken")
 const mongoose = require('mongoose')
 const Page = require('../dbSchemas/pageShema')
+const jsdom = require('jsdom')
+const { JSDOM } = jsdom;
 
 router.use(express.json())
 
@@ -15,6 +17,27 @@ router.get('/all', async (req, res) => {
     for (let i = 0; i < pages.length; i++) {
         resPages[i].toJSON().authorName = await Page.find({ id: resPages[i].author })
     }
+    let savedPages = fs.readdirSync(path.join(__dirname, "/../pages"))
+    savedPages.forEach(item => {
+        //console.log(item)
+        let savedPage = { url: item.split(".html")[0], id: item.split(".html")[0] }
+        let dom = new JSDOM(fs.readFileSync(path.join(__dirname, "/../pages", item)))
+        savedPage.desc = dom.window.document.querySelector('meta[name="description"]').content
+        savedPage.template = dom.window.document.querySelector('meta[name="cmsdata"]').content
+        savedPage.headline = dom.window.document.title
+        let saveItems = dom.window.document.body.getElementsByTagName("*")
+        savedPage.content = []
+        for (let i = 0; i < saveItems.length; i++) {
+            if (saveItems[i].tagName == "P" || saveItems[i].tagName == "H1" || saveItems[i].tagName == "H2" || saveItems[i].tagName == "H3" || saveItems[i].tagName == "H4" || saveItems[i].tagName == "H5" || saveItems[i].tagName == "H6") {
+                savedPage.content.push({ id: saveItems[i].getAttribute("data-elemid"), text: saveItems[i].innerHTML })
+            } else if (saveItems[i].tagName == "A") {
+                savedPage.content.push({ id: saveItems[i].getAttribute("data-elemid"), text: saveItems[i].innerHTML, url: saveItems[i].href })
+            } else if (saveItems[i].tagName == "IMG") {
+                savedPage.content.push({ id: saveItems[i].getAttribute("data-elemid"), src: saveItems[i].src })
+            }
+        }
+        resPages.push(savedPage)
+    })
     res.send(JSON.stringify(resPages))
 })
 
@@ -61,7 +84,29 @@ router.post('/data/:urlParameter', async (req, res) => {
 router.get('/:urlParameter', async (req, res) => {
     let page = await Page.findOne({ url: req.params.urlParameter })
     if (page == undefined) {
-        res.sendStatus(404)
+        if (fs.existsSync(path.join(__dirname, "/../pages", req.params.urlParameter + ".html"))) {
+            let savedPage = { url: req.params.urlParameter, id: req.params.urlParameter }
+            let dom = new JSDOM(fs.readFileSync(path.join(__dirname, "/../pages", req.params.urlParameter + ".html")))
+            savedPage.desc = dom.window.document.querySelector('meta[name="description"]').content
+            savedPage.template = dom.window.document.querySelector('meta[name="cmsdata"]').content
+            savedPage.headline = dom.window.document.title
+            let saveItems = dom.window.document.body.getElementsByTagName("*")
+            savedPage.content = []
+            for (let i = 0; i < saveItems.length; i++) {
+                if (saveItems[i].tagName == "P" || saveItems[i].tagName == "H1" || saveItems[i].tagName == "H2" || saveItems[i].tagName == "H3" || saveItems[i].tagName == "H4" || saveItems[i].tagName == "H5" || saveItems[i].tagName == "H6") {
+                    savedPage.content.push({ id: saveItems[i].getAttribute("data-elemid"), text: saveItems[i].innerHTML })
+                } else if (saveItems[i].tagName == "A") {
+                    savedPage.content.push({ id: saveItems[i].getAttribute("data-elemid"), text: saveItems[i].innerHTML, url: saveItems[i].href })
+                } else if (saveItems[i].tagName == "IMG") {
+                    savedPage.content.push({ id: saveItems[i].getAttribute("data-elemid"), src: saveItems[i].src })
+                }else if(saveItems[i].tagName == "BUTTON"){
+                    savedPage.content.push({ id: saveItems[i].getAttribute("data-elemid"), text: saveItems[i].innerHTML })
+                }
+            }
+            res.send(savedPage)
+        } else {
+            res.sendStatus(404)
+        }
     } else {
         if (req.get("origin") != "http://localhost:8080" || req.get("origin") != "http://localhost:5500") {
             Page.findOneAndUpdate({ url: req.params.urlParameter }, { $inc: { visited: 1 } }).exec()
@@ -96,7 +141,7 @@ router.post('/save', async (req, res) => {
         if (fs.existsSync(path.join(__dirname, "/../pages/", req.body.url + ".html"))) {
             res.sendStatus(409)
         } else {
-            res.status(200).send({message: "ok"})
+            res.status(200).send({ message: "ok" })
         }
     } catch (error) {
         console.log(error)
@@ -108,7 +153,7 @@ router.post("/save/data/:name", (req, res) => {
     try {
         const token = req.headers['authorization']
         let parsedToken = jwt.verify(token, process.env.SECRET)
-        let file = fs.createWriteStream(path.join(__dirname, "/../pages/", req.params.name + ".html"))
+        let file = fs.createWriteStream(path.join(__dirname, "/../pages/", req.body.name + ".html"))
         file.write(req.body.data)
         file.end()
         res.sendStatus(201)
@@ -120,7 +165,29 @@ router.post("/save/data/:name", (req, res) => {
 router.get("/id/:pageId", async (req, res) => {
     let page = await Page.findOne({ id: req.params.pageId })
     if (page == undefined) {
-        res.sendStatus(404)
+        if (fs.existsSync(path.join(__dirname, "/../pages", req.params.pageId + ".html"))) {
+            let savedPage = { url: req.params.urlParameter, id: req.params.urlParameter }
+            let dom = new JSDOM(fs.readFileSync(path.join(__dirname, "/../pages", req.params.pageId + ".html")))
+            savedPage.desc = dom.window.document.querySelector('meta[name="description"]').content
+            savedPage.template = dom.window.document.querySelector('meta[name="cmsdata"]').content
+            savedPage.headline = dom.window.document.title
+            let saveItems = dom.window.document.body.getElementsByTagName("*")
+            savedPage.content = []
+            for (let i = 0; i < saveItems.length; i++) {
+                if (saveItems[i].tagName == "P" || saveItems[i].tagName == "H1" || saveItems[i].tagName == "H2" || saveItems[i].tagName == "H3" || saveItems[i].tagName == "H4" || saveItems[i].tagName == "H5" || saveItems[i].tagName == "H6") {
+                    savedPage.content.push({ id: saveItems[i].getAttribute("data-elemid"), text: saveItems[i].innerHTML })
+                } else if (saveItems[i].tagName == "A") {
+                    savedPage.content.push({ id: saveItems[i].getAttribute("data-elemid"), text: saveItems[i].innerHTML, url: saveItems[i].href })
+                } else if (saveItems[i].tagName == "IMG") {
+                    savedPage.content.push({ id: saveItems[i].getAttribute("data-elemid"), src: saveItems[i].src })
+                }else if(saveItems[i].tagName == "BUTTON"){
+                    savedPage.content.push({ id: saveItems[i].getAttribute("data-elemid"), text: saveItems[i].innerHTML })
+                }
+            }
+            res.send(savedPage)
+        } else {
+            res.sendStatus(404)
+        }
     } else {
         if (req.get("origin") != "http://localhost:8080" || req.get("origin") != "http://localhost:5500") {
             Page.findOneAndUpdate({ url: req.params.urlParameter }, { $inc: { visited: 1 } }).exec()
