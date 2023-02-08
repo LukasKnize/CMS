@@ -19,24 +19,25 @@ router.get('/all', async (req, res) => {
     }
     let savedPages = fs.readdirSync(path.join(__dirname, "/../pages"))
     savedPages.forEach(item => {
-        //console.log(item)
-        let savedPage = { url: item.split(".html")[0], id: item.split(".html")[0] }
-        let dom = new JSDOM(fs.readFileSync(path.join(__dirname, "/../pages", item)))
-        savedPage.desc = dom.window.document.querySelector('meta[name="description"]').content
-        savedPage.template = dom.window.document.querySelector('meta[name="cmsdata"]').content
-        savedPage.headline = dom.window.document.title
-        let saveItems = dom.window.document.body.getElementsByTagName("*")
-        savedPage.content = []
-        for (let i = 0; i < saveItems.length; i++) {
-            if (saveItems[i].tagName == "P" || saveItems[i].tagName == "H1" || saveItems[i].tagName == "H2" || saveItems[i].tagName == "H3" || saveItems[i].tagName == "H4" || saveItems[i].tagName == "H5" || saveItems[i].tagName == "H6") {
-                savedPage.content.push({ id: saveItems[i].getAttribute("data-elemid"), text: saveItems[i].innerHTML })
-            } else if (saveItems[i].tagName == "A") {
-                savedPage.content.push({ id: saveItems[i].getAttribute("data-elemid"), text: saveItems[i].innerHTML, url: saveItems[i].href })
-            } else if (saveItems[i].tagName == "IMG") {
-                savedPage.content.push({ id: saveItems[i].getAttribute("data-elemid"), src: saveItems[i].src })
+        if(/[^"]+\.html/.test(item)){
+            let savedPage = { url: item.split(".html")[0], id: item.split(".html")[0] }
+            let dom = new JSDOM(fs.readFileSync(path.join(__dirname, "/../pages", item)))
+            savedPage.desc = dom.window.document.querySelector('meta[name="description"]').content
+            savedPage.template = dom.window.document.querySelector('meta[name="cmsdata"]').content
+            savedPage.headline = dom.window.document.title
+            let saveItems = dom.window.document.body.getElementsByTagName("*")
+            savedPage.content = []
+            for (let i = 0; i < saveItems.length; i++) {
+                if (saveItems[i].tagName == "P" || saveItems[i].tagName == "H1" || saveItems[i].tagName == "H2" || saveItems[i].tagName == "H3" || saveItems[i].tagName == "H4" || saveItems[i].tagName == "H5" || saveItems[i].tagName == "H6") {
+                    savedPage.content.push({ id: saveItems[i].getAttribute("data-elemid"), text: saveItems[i].innerHTML })
+                } else if (saveItems[i].tagName == "A") {
+                    savedPage.content.push({ id: saveItems[i].getAttribute("data-elemid"), text: saveItems[i].innerHTML, url: saveItems[i].href })
+                } else if (saveItems[i].tagName == "IMG") {
+                    savedPage.content.push({ id: saveItems[i].getAttribute("data-elemid"), src: saveItems[i].src })
+                }
             }
+            resPages.push(savedPage)
         }
-        resPages.push(savedPage)
     })
     res.send(JSON.stringify(resPages))
 })
@@ -46,8 +47,12 @@ router.post("/", async (req, res) => {
         const token = req.headers['authorization']
         let parsedToken = jwt.verify(token, process.env.SECRET)
         let page = req.body
-        if (await Page.exists({ url: req.body.url }) != null) {
-            res.sendStatus(409)
+        if(!fs.existsSync(__dirname, "/../templates", page.url)){
+            res.status(400).send({message: "template doesn't exist"})
+        }else if (page.url == "" || page.desc == "" || page.template == "") {
+            res.status(400).send({message: "all parameters are required"})
+        }else if (await Page.exists({ url: req.body.url }) != null) {
+            res.send(409).send({message: "url aready exists"})
         } else {
             let id = require('crypto').randomBytes(16).toString('hex')
             while (await Page.exists({ id: id }) != null) {
@@ -62,10 +67,10 @@ router.post("/", async (req, res) => {
                 visited: 0,
                 author: parsedToken.id
             })
-
+ 
             await newPage.save()
 
-            res.status(201).send({ message: "crated", id: id })
+            res.status(201).send({ message: "created", id: id })
         }
     } catch (error) {
         res.sendStatus(403)
@@ -138,10 +143,14 @@ router.post('/save', async (req, res) => {
     try {
         const token = req.headers['authorization']
         let parsedToken = jwt.verify(token, process.env.SECRET)
-        if (fs.existsSync(path.join(__dirname, "/../pages/", req.body.url + ".html"))) {
-            res.sendStatus(409)
+        if(!fs.existsSync(__dirname, "/../templates", req.body.url)){
+            res.status(400).send({message: "template doesn't exist"})
+        }else if (req.body.url == "" || req.body.desc == "" || req.body.template == "") {
+            res.status(400).send({message: "all parameters are required"})
+        }else if (fs.existsSync(path.join(__dirname, "/../pages/", req.body.url + ".html"))) {
+            res.send(409).send({message: "url aready exists"})
         } else {
-            res.status(200).send({ message: "ok" })
+            res.status(200).send({ message: "created" })
         }
     } catch (error) {
         console.log(error)

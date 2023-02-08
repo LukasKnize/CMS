@@ -32,9 +32,9 @@ router.post("/", upload.single('template'), (req, res) => {
                     fs.unlinkSync(filepath)
                 })
             }
-            res.sendStatus(200)
+            res.status(200).send({message: "template has been uploaded"})
         }else{
-            res.sendStatus(403)
+            res.status(403).send({message: "user has to be admin to upload template"})
         }
     } catch (error) {
         res.sendStatus(500)
