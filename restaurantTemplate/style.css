@@ -35,6 +35,9 @@ header nav .links a {
   padding: 0 25px;
   color: #090809;
 }
+header nav .mobile {
+  display: none;
+}
 header .contentContainer {
   display: flex;
   height: calc(100% - 50px);
@@ -112,13 +115,13 @@ main #food .foodItem h2 {
   left: 0;
 }
 main #chef {
-  height: 100vh;
+  height: auto;
   width: 100%;
   display: flex;
 }
 main #chef img {
   width: 50%;
-  height: 100%;
+  height: auto;
 }
 main #chef .content {
   width: calc(50% - 50px);
@@ -127,11 +130,89 @@ main #chef .content {
   background-color: #BF211E;
 }
 main #chef .content h2 {
+  font-size: 2.5em;
   color: #FCFCFC;
 }
 main #chef .content h3 {
   color: #090809;
 }
 main #chef .content p {
+  font-size: 1.3em;
   color: #FCFCFC;
+}
+main #location {
+  height: 250px;
+  width: 100%;
+  display: flex;
+}
+main #location .footerSection {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+main #location .footerSection .textContainer {
+  display: flex;
+  width: 80%;
+}
+main #location .footerSection .textContainer img {
+  width: 40px;
+  height: 40px;
+}
+main #location .footerSection .textContainer p {
+  font-size: 1.5em;
+}
+main #location .footerSection .timeTable p {
+  text-align: center;
+  width: 100%;
+}
+
+footer {
+  width: 100%;
+  text-align: center;
+}
+footer p {
+  font-size: 1.3em;
+  font-weight: bold;
+}
+
+@media (max-width: 850px) {
+  main #chef {
+    flex-direction: column;
+  }
+  main #chef img {
+    width: 100%;
+  }
+  main #chef .content {
+    width: calc(100% - 50px);
+    height: auto;
+    padding: 25px;
+  }
+}
+@media (max-width: 650px) {
+  header .contentContainer .imgContainer {
+    display: none;
+  }
+  header .contentContainer .flagContainer {
+    width: 100%;
+  }
+  header nav .links {
+    display: none;
+  }
+  header nav .mobile {
+    display: block;
+    background-color: #BF211E;
+    height: 40px;
+    width: 40px;
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  header nav .mobile img {
+    height: 30px;
+    width: 30px;
+  }
 }/*# sourceMappingURL=style.css.map */
