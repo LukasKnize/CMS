@@ -11,9 +11,9 @@ router.use(express.json())
 router.get('/', async (req, res) => {
     let user = await User.find({})
     if (user.length == 0) {
-        res.send({ message: "no users", token: jwt.sign({ type: "firstTime" }, process.env.SECRET, { expiresIn: '1h' }) })
+        res.status(200).send({ message: "no users", token: jwt.sign({ type: "firstTime" }, process.env.SECRET, { expiresIn: '1h' }) })
     } else {
-        res.send({ message: "active users" })
+        res.status(200).send({ message: "active users" })
     }
 })
 
@@ -37,7 +37,7 @@ router.post("/deleteAccount", async (req, res) => {
             res.status(403).send({ message: "access denied, only admin can delete other accounts" })
         }
     } catch (error) {
-        res.sendStatus(400)
+        res.status(403).send({message: "wrong authorization token"})
     }
 })
 
@@ -63,10 +63,10 @@ router.patch("/:userId", async (req, res) => {
             }
             user.save()
         } else {
-            res.sendStatus(403)
+            res.sendStatus(403).send({message: "you can't edit this user"})
         }
     } catch (error) {
-        res.sendStatus(500)
+        res.status(403).send({message: "wrong authorization token"})
     }
 })
 

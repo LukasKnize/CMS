@@ -55,7 +55,7 @@ router.post("/signUp", async (req, res) => {
             }
         }
     } catch (error) {
-        res.sendStatus(500)
+        res.status(403).send({message: "wrong authorization token"})
     }
 
 })
@@ -73,9 +73,9 @@ router.post("/logIn", async (req, res) => {
             user = user.toJSON()
             if (user != undefined) {
                 let token = jwt.sign({ username: user.username, email: user.email, type: user.type, id: result }, process.env.SECRET)
-                res.json({ token: token })
+                res.status(200).json({ token: token })
             } else {
-                res.sendStatus(404)
+                res.status(404).send({message: "this user doesn't exists"})
             }
         } else {
             res.status(400).send({ message: result })
@@ -107,14 +107,14 @@ router.post("/signUpAdmin", async (req, res) => {
                     userR(user).then((result) => {
                         if (result[0] == "ok") {
                             let token = jwt.sign({ username: user.username, email: user.email, type: user.type, id: result[1] }, process.env.SECRET)
-                            res.json({ token: token })
+                            res.status(200).json({ token: token })
                         } else {
                             res.status(400).send({ message: result })
                         }
                     })
                 }
             } catch (error) {
-                res.sendStatus(500)
+                res.status(403).send({message: "wrong authorization token"})
             }  
         } else {
             res.status(400).send({ message: result })

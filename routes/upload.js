@@ -28,7 +28,7 @@ router.post("/", upload.array('files[]'), (req, res, next) => {
         }
         res.status(201).send({ urls: response })
     } catch (error) {
-        res.sendStatus(403)
+        res.status(403).send({message: "wrong authorization token"})
     }
 })
 

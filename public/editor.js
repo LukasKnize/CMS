@@ -273,6 +273,28 @@ async function save() {
             })
                 })
             })
+        }else{
+            let doc = document.documentElement.innerHTML
+            let regex = /(?<=<!--Code injected by CMS-->)(.*)(?=<!--Code injected by CMS-->)/
+            doc = doc.replace(regex, "")
+            doc = doc.replace("<!--Code injected by CMS--><!--Code injected by CMS-->", "")
+            const resp = fetch("http://localhost:5500/pages/save/data/" + splitedID[0], {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "authorization": token
+                },
+                body: JSON.stringify({
+                    "data": "<!DOCTYPE html> <html>" + doc + "</html>",
+                    "name": splitedID[0]
+                }),
+            });
+
+            resp.then(resp => {
+                if (resp.status == 201) {
+                    history.back(-1)
+                }
+            })
         }
     } else {
         let saveItems = document.body.getElementsByTagName("*")

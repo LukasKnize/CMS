@@ -14,7 +14,7 @@ let storage = multer.diskStorage({
         cb(null, 'templates/')
     },
     filename: function (req, file, cb) {
-        cb(null, Date.now() + '.zip')
+        cb(null, file.originalname)
     }
 })
 
@@ -30,16 +30,51 @@ router.post("/", upload.single('template'), (req, res) => {
                 let filepath = path.join(req.file.destination, req.file.filename);
                 fs.createReadStream(filepath).pipe(unzipper.Extract({ path: path.join(__dirname, "/../templates") })).on("close", () => {
                     fs.unlinkSync(filepath)
+                    let isValid = true
+                    fs.readdirSync(path.join(__dirname, "/../templates")).forEach(item => {
+
+                        if (fs.statSync(path.join(__dirname, "/../templates", item)).isDirectory()) {
+                            let files = fs.readdirSync(path.join(__dirname, "/../templates", item))
+                            let hasScreenshot = false
+                            let hasHTML = false
+                            for (let i = 0; i < files.length; i++) {
+                                if (files[i] == "screenshot.webp" || files[i] == "screenshot.jpg" || files[i] == "screenshot.png") {
+                                    hasScreenshot = true
+                                    if (hasHTML) {
+                                        break
+                                    }
+                                } else if (files[i].split(".")[1] == "html") {
+                                    hasHTML = true
+                                    if (hasScreenshot) {
+                                        break
+                                    }
+                                }
+                            }
+                            if (!hasHTML || !hasScreenshot) {
+                                deleteFolderRecursive(path.join(__dirname, "/../templates", item))
+                                isValid = false
+                            }
+                        } else {
+                            fs.unlinkSync(path.join(__dirname, "/../templates", item))
+                            isValid = false
+                        }
+
+                    })
+                    if (isValid) {
+                        res.status(200).send({ message: "template has been uploaded" })
+                    }else{
+                        res.status(400).send({ message: "invalid template" })
+                    }
                 })
             }
-            res.status(200).send({message: "template has been uploaded"})
-        }else{
-            res.status(403).send({message: "user has to be admin to upload template"})
+        } else {
+            fs.unlinkSync(path.join(req.file.destination, req.file.filename))
+            res.status(403).send({ message: "user has to be admin to upload template" })
         }
     } catch (error) {
-        res.sendStatus(500)
+        res.status(403).send({ message: "wrong authorization token" })
     }
-    
+
 })
 
 router.get("/all", (req, res) => {
@@ -95,3 +130,17 @@ router.get("/edit/:param", (req, res) => {
         })
 })
 module.exports = router
+
+let deleteFolderRecursive = function(path) {
+    if( fs.existsSync(path) ) {
+        fs.readdirSync(path).forEach(function(file) {
+          var curPath = path + "/" + file;
+            if(fs.lstatSync(curPath).isDirectory()) {
+                deleteFolderRecursive(curPath);
+            } else {
+                fs.unlinkSync(curPath);
+            }
+        });
+        fs.rmdirSync(path);
+      }
+  }

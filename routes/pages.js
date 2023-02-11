@@ -39,7 +39,7 @@ router.get('/all', async (req, res) => {
             resPages.push(savedPage)
         }
     })
-    res.send(JSON.stringify(resPages))
+    res.status(302).send(JSON.stringify(resPages))
 })
 
 router.post("/", async (req, res) => {
@@ -73,7 +73,7 @@ router.post("/", async (req, res) => {
             res.status(201).send({ message: "created", id: id })
         }
     } catch (error) {
-        res.sendStatus(403)
+        res.status(403).send({message: "wrong authorization token"})
     }
 })
 
@@ -82,7 +82,7 @@ router.post('/data/:urlParameter', async (req, res) => {
     if (page != null) {
         page.content = req.body.content
         page.save()
-        res.sendStatus(201)
+        res.status(201).send({message: "data saved"})
     }
 })
 
@@ -108,15 +108,15 @@ router.get('/:urlParameter', async (req, res) => {
                     savedPage.content.push({ id: saveItems[i].getAttribute("data-elemid"), text: saveItems[i].innerHTML })
                 }
             }
-            res.send(savedPage)
+            res.status(300).send(savedPage)
         } else {
-            res.sendStatus(404)
+            res.status(404).send({message: "page not found"})
         }
     } else {
         if (req.get("origin") != "http://localhost:8080" || req.get("origin") != "http://localhost:5500") {
             Page.findOneAndUpdate({ url: req.params.urlParameter }, { $inc: { visited: 1 } }).exec()
         }
-        res.send(page.toJSON())
+        res.status(300).send(page.toJSON())
     }
 })
 
@@ -128,12 +128,12 @@ router.delete("/:urlParameter", async (req, res) => {
             let parsedToken = jwt.verify(token, process.env.SECRET)
             if (parsedToken.type == "admin" || parsedToken.id == page.author) {
                 await Page.deleteOne({ url: req.params.urlParameter })
-                res.sendStatus(200)
+                res.status(200).send({message: "deleted"})
             } else {
-                res.sendStatus(403)
+                res.status(403).send({message: "wrong authorization token"})
             }
         } catch (error) {
-            res.sendStatus(500)
+            res.status(403).send({message: "wrong authorization token"})
         }
     }
 
@@ -153,8 +153,7 @@ router.post('/save', async (req, res) => {
             res.status(200).send({ message: "created" })
         }
     } catch (error) {
-        console.log(error)
-        res.sendStatus(403)
+        res.status(403).send({message: "wrong authorization token"})
     }
 })
 
@@ -165,9 +164,9 @@ router.post("/save/data/:name", (req, res) => {
         let file = fs.createWriteStream(path.join(__dirname, "/../pages/", req.body.name + ".html"))
         file.write(req.body.data)
         file.end()
-        res.sendStatus(201)
+        res.status(201).send({message: "created"})
     } catch (error) {
-        res.sendStatus(403)
+        res.status(403).send({message: "wrong authorization token"})
     }
 })
 
@@ -193,15 +192,15 @@ router.get("/id/:pageId", async (req, res) => {
                     savedPage.content.push({ id: saveItems[i].getAttribute("data-elemid"), text: saveItems[i].innerHTML })
                 }
             }
-            res.send(savedPage)
+            res.status(300).send(savedPage)
         } else {
-            res.sendStatus(404)
+            res.status(404).send({message: "page not found"})
         }
     } else {
         if (req.get("origin") != "http://localhost:8080" || req.get("origin") != "http://localhost:5500") {
             Page.findOneAndUpdate({ url: req.params.urlParameter }, { $inc: { visited: 1 } }).exec()
         }
-        res.send(page.toJSON())
+        res.status(300).send(page.toJSON())
     }
 })
 
