@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        h1{
+            font-weight: normal;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="content"></div>
+    <script>
+
+        let contentArea = ""
+        let data = `# *Idk*
+# ** some stupid text **
+Some text idk
+# Idk2 ***more idk*** idk *** evem more idk ***`;
+        data = data.split("\n");
+        contentArea = document.getElementById("content")
+        for (let i = 0; i < data.length; i++) {
+            if (/^\# (.*)$/gm.test(data[i])) {
+                let line = data[i].split("# ")[1]
+                if (/(\*\*\*(.*)\*\*\*)/gm.test(line)) {
+                    let bLine = line.split("***")
+                    let final = ""
+                    for (let j = 0; j < bLine.length; j++) {
+                        final += bLine[j]
+                        if((j + 1) % 2 == 0){
+                            final += "</b></i>"
+                        }else{
+                            final += "<b><i>"
+                        }
+                    }
+                    contentArea.innerHTML += "<h1>" + final + "</h1>"
+                }else if (/(\*\*(.*)\*\*)/gm.test(line)) {
+                    let bLine = line.split("**")
+                    let final = ""
+                    for (let j = 0; j < bLine.length; j++) {
+                        final += bLine[j]
+                        if((j + 1) % 2 == 0){
+                            final += "</b>"
+                        }else{
+                            final += "<b>"
+                        }
+                    }
+                    contentArea.innerHTML += "<h1>" + final + "</h1>"
+                }else if (/(\*(.*)\*)/gm.test(line)) {
+                    let bLine = line.split("*")
+                    let final = ""
+                    for (let j = 0; j < bLine.length; j++) {
+                        final += bLine[j]
+                        if((j + 1) % 2 == 0){
+                            final += "</i>"
+                        }else{
+                            final += "<i>"
+                        }
+                    }
+                    contentArea.innerHTML += "<h1>" + final + "</h1>"
+                }else {
+                    contentArea.innerHTML += "<h1>" + data[i].split("# ")[1] + "</h1>"
+                }
+            } else {
+                contentArea.innerHTML += "<p>" + data[i] + "</p>"
+            }
+            console.log(data[i])
+        }
+    </script>
+</body>
+
+</html>
