@@ -19,6 +19,8 @@
 <script setup>
 import SideBar from "@/components/sideBar.vue";
 import Content from "@/components/content.vue";
+import { usePagesStore } from "@/stores/pages.js";
+let dataStore = usePagesStore();
 </script>
 
 <style>

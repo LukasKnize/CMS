@@ -2,32 +2,25 @@
     <div id="content"></div>
 </template>
 
+
+
 <script setup>
 import { ref, onMounted } from "vue";
-let contentArea = ""
+import { usePagesStore } from "@/stores/pages.js";
+let contentArea = "";
 let data = `# Idk
     
-Some text idk
+***Some* text** idk
 # Idk2`;
-data = data.split("\n");
 
 onMounted(() => {
-    contentArea = document.getElementById("content")
-    for (let i = 0; i < data.length; i++) {
-    if (/^\# (.*)$/gm.test(data[i])) {
-        contentArea.innerHTML += "<h1>" + data[i].split("# ")[1] + "</h1>"
-    }else {
-        contentArea.innerHTML += "<p>" + data[i] + "</p>"
-    }
-    console.log(data[i])
-}
+    contentArea = document.getElementById("content");
+    contentArea.innerHTML = marked.parse(data)
 });
-
-
 </script>
 
 <style scoped>
-#content{
+#content {
     margin-left: 300px;
 }
 </style>
