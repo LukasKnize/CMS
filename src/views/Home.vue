@@ -1,6 +1,5 @@
 <template>
-  <HelloWorld />
-  <SideBar />
+ <HelloWorld />
 </template>
 
 <script setup>

@@ -9,37 +9,35 @@
 
       <div class="text-body-2 font-weight-light mb-n1">Welcome to</div>
 
-      <h1 class="text-h2 font-weight-bold">Vuetify</h1>
+      <h1 class="text-h2 font-weight-bold">CMS</h1>
 
       <div class="py-14" />
 
       <v-row class="d-flex align-center justify-center">
         <v-col cols="auto">
           <v-btn
-            href="https://next.vuetifyjs.com/components/all/"
+            href="https://github.com/LukasKnize/CMS/tree/backend"
             min-width="164"
             rel="noopener noreferrer"
-            target="_blank"
             variant="text"
           >
             <v-icon
-              icon="mdi-view-dashboard"
+              icon="mdi-github"
               size="large"
               start
             />
 
-            Components
+            GitHub
           </v-btn>
         </v-col>
 
         <v-col cols="auto">
           <v-btn
             color="primary"
-            href="https://next.vuetifyjs.com/introduction/why-vuetify/#feature-guides"
+            href="/docs"
             min-width="228"
             rel="noopener noreferrer"
             size="x-large"
-            target="_blank"
             variant="flat"
           >
             <v-icon
@@ -54,7 +52,7 @@
 
         <v-col cols="auto">
           <v-btn
-            href="https://community.vuetifyjs.com/"
+            href="https://github.com/LukasKnize/CMS/issues"
             min-width="164"
             rel="noopener noreferrer"
             target="_blank"
@@ -66,7 +64,7 @@
               start
             />
 
-            Community
+            Issues 
           </v-btn>
         </v-col>
       </v-row>
