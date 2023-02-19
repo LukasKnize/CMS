@@ -12,9 +12,7 @@ let contentArea = "";
 let data = "";
 
 data = usePagesStore().data;
-console.log(data)
 data = JSON.parse(JSON.stringify(data.chapters[0].pages[0].data));
-console.log(data)
 
 watch(useContentStore(), (currData) => {
     data = JSON.parse(JSON.stringify(currData.data));
@@ -54,5 +52,10 @@ img {
 
 .mg {
     margin: 20px 0;
+}
+
+blockquote {
+    border-left: #D50000 solid 5px;
+    background-color: #4242423c;
 }
 </style>

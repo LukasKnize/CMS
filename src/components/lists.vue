@@ -12,7 +12,6 @@ const props = defineProps({
 });
 
 function changeCurrentData(data) {
-    console.log(data)
     useContentStore().data = data
 }
 </script>

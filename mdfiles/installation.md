@@ -1,5 +1,7 @@
 # Instalace
 
+> Tato aplikace je stále ve stádiu vývoje a proto nedoporučujeme tuto aplikaci používat. Spousta užitečných funkcí stále chybí a je možné že dojde k velkým zménám v programu který by mohl kompletně rozbít aplikaci.
+
 ## Co je zapotřebí?
 
 - Node.js - aplikace je napsaná v javaScriptu a pro její spuštění je zapotřebí node.js a spolu s ním i NPM (zpravidla se instaluje automaticky s node.js). [Node.js](https://nodejs.org/en/)

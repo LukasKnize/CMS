@@ -10,8 +10,6 @@ import {toRaw } from "vue"
 import { usePagesStore } from "@/stores/pages.js";
 let dataStore = usePagesStore();
 let propData = JSON.parse(JSON.stringify(dataStore.data))
-console.log(propData.chapters)
-console.log(propData.chapters.length)
 </script>
 
 <style scoped>
