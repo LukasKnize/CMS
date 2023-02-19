@@ -1,4 +1,4 @@
-*{
+* {
     padding: 0;
     margin: 0;
     font-family: 'Jaldi', sans-serif;
@@ -8,29 +8,61 @@ $black: #090809;
 $white: #FCFCFC;
 $red: #BF211E;
 
-body{
+body {
     background-color: $white;
 }
 
-header{
+#mobileMenu {
+    width: 100%;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 99;
+    background-color: $red;
+    display: none;
+    flex-direction: column;
+    text-align: center;
+    a{
+        margin-top: 25px;
+        font-size: 1.2em;
+        color: $white;
+    }
+    .menuHeader{
+        width: calc(100% - 20px);
+        padding: 0 10px;
+        display: flex;
+        justify-content: space-between;
+        .logo {
+            font-size: 1.7em;
+            font-weight: bold;
+            color: $black;
+        }
+    }
+}
+
+header {
     height: 100vh;
     width: 100%;
-    nav{
+
+    nav {
         display: flex;
         align-items: center;
         justify-content: space-between;
         width: calc(100% - 50px);
         padding: 0 25px;
         height: 50px;
-        .logo{
+
+        .logo {
             font-size: 1.7em;
             font-weight: bold;
             color: $black;
         }
 
-        .links{
+        .links {
             display: flex;
-            a{
+
+            a {
                 font-size: 1.5em;
                 font-weight: bold;
                 text-decoration: none;
@@ -43,10 +75,12 @@ header{
             display: none;
         }
     }
-    .contentContainer{
+
+    .contentContainer {
         display: flex;
         height: calc(100% - 50px);
         width: 100%;
+
         .flagContainer {
             width: 50%;
             height: 100%;
@@ -55,7 +89,8 @@ header{
             position: relative;
             justify-content: center;
             align-items: center;
-            .circle{
+
+            .circle {
                 width: 200px;
                 height: 200px;
                 border-radius: 100px;
@@ -67,16 +102,24 @@ header{
                 margin-left: -100px;
                 z-index: -1;
             }
-            h1{
+
+            h1 {
                 font-size: 2.5em;
+                text-align: center;
+            }
+
+            h2 {
+                text-align: center;
             }
         }
-        .imgContainer{
+
+        .imgContainer {
             width: 50%;
-            height: 100%    ;
+            height: 100%;
             display: flex;
             align-items: center;
-            img{
+
+            img {
                 width: 100%;
             }
         }
@@ -84,32 +127,38 @@ header{
 
 }
 
-main{
-    #food{
+main {
+    #food {
         width: 100%;
         display: flex;
         height: 250px;
-        .foodItem{
+
+        .foodItem {
             width: calc(100% / 3);
             height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
-            &:first-child{
+
+            &:first-child {
                 background-color: $red;
             }
-            &:nth-child(2){
+
+            &:nth-child(2) {
                 background-color: $black;
             }
-            &:nth-child(3){
+
+            &:nth-child(3) {
                 background-color: $red;
             }
-            img{
+
+            img {
                 max-width: calc(100% - 50px);
                 max-height: calc(100% - 50px);
             }
-            h2{
+
+            h2 {
                 height: 50px;
                 width: 100%;
                 text-align: center;
@@ -122,58 +171,67 @@ main{
             }
         }
     }
-    #chef{
+
+    #chef {
         height: auto;
         width: 100%;
         display: flex;
-        img{
+
+        img {
             width: 50%;
             height: auto;
         }
-        .content{
+
+        .content {
             width: calc(50% - 50px);
-            height: calc(100% - 50px);
             padding: 25px;
             background-color: $red;
-            h2{
+
+            h2 {
                 font-size: 2.5em;
                 color: $white;
             }
-            h3{
+
+            h3 {
                 color: $black;
             }
-            p{
+
+            p {
                 font-size: 1.3em;
                 color: $white;
             }
         }
     }
 
-    #location{
+    #location {
         height: 250px;
         width: 100%;
         display: flex;
-        .footerSection{
+
+        .footerSection {
             width: 50%;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             position: relative;
-            .textContainer{
+
+            .textContainer {
                 display: flex;
                 width: 80%;
-                img{
+
+                img {
                     width: 40px;
                     height: 40px;
                 }
-                p{
+
+                p {
                     font-size: 1.5em;
                 }
             }
 
-            .timeTable{
-                p{
+            .timeTable {
+                p {
                     text-align: center;
                     width: 100%;
                 }
@@ -182,23 +240,26 @@ main{
     }
 }
 
-footer{
+footer {
     width: 100%;
     text-align: center;
-    p{
+
+    p {
         font-size: 1.3em;
         font-weight: bold;
     }
 }
 
-@media(max-width: 850px){
-    main{
-        #chef{
-    flex-direction: column;
-            img{
+@media(max-width: 850px) {
+    main {
+        #chef {
+            flex-direction: column;
+
+            img {
                 width: 100%;
             }
-            .content{
+
+            .content {
                 width: calc(100% - 50px);
                 height: auto;
                 padding: 25px;
@@ -207,7 +268,7 @@ footer{
     }
 }
 
-@media(max-width: 650px){
+@media(max-width: 650px) {
     header .contentContainer .imgContainer {
         display: none;
     }
@@ -216,12 +277,13 @@ footer{
         width: 100%;
     }
 
-    header{
-        nav{
-    
-            .links{
+    header {
+        nav {
+
+            .links {
                 display: none;
             }
+
             .mobile {
                 display: block;
                 background-color: $red;
@@ -231,10 +293,33 @@ footer{
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                img{
+
+                img {
                     height: 30px;
                     width: 30px;
                 }
+            }
+        }
+    }
+
+    main {
+        #food {
+            flex-direction: column;
+            height: 750px;
+
+            .foodItem {
+                width: 100%;
+                height: 250px;
+            }
+        }
+
+        #location {
+            height: auto;
+            flex-direction: column;
+
+            .footerSection {
+                width: 100%;
+                margin: 15px 0;
             }
         }
     }

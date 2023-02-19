@@ -19,10 +19,10 @@
 
             <div class="links">
                 <a href="#food">FOOD</a>
-                <a href="">LOCATION</a>
-                <a href="">CHEF</a>
+                <a href="#location">LOCATION</a>
+                <a href="#chef">CHEF</a>
             </div>
-            <div class="mobile">
+            <div class="mobile" onclick="openMenu()">
                 <img src="./menu_FILL1_wght400_GRAD0_opsz48.svg" alt="">
             </div>
         </nav>
@@ -37,6 +37,18 @@
             </div>
         </div>
     </header>
+
+    <div id="mobileMenu">
+        <div class="menuHeader">
+            <p class="logo">FTS</p>
+            <div class="mobile" onclick="closeMenu()">
+                <img src="./menu_FILL1_wght400_GRAD0_opsz48.svg" alt="">
+            </div>
+        </div>
+        <a href="#food" onclick="closeMenu()">FOOD</a>
+        <a href="#location" onclick="closeMenu()">LOCATION</a>
+        <a href="#chef" onclick="closeMenu()">CHEF</a>
+    </div>
 
     <main>
         <article id="food">
@@ -90,6 +102,16 @@
     <footer>
         <p>Copyright © 2023 FTS</p>
     </footer>
+
+    <script>
+        function openMenu(){
+            document.getElementById("mobileMenu").style.display = "flex"
+        }
+
+        function closeMenu(){
+            document.getElementById("mobileMenu").style.display = "none"
+        }
+    </script>
 </body>
 
 </html>

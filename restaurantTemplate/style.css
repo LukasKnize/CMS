@@ -8,6 +8,35 @@ body {
   background-color: #FCFCFC;
 }
 
+#mobileMenu {
+  width: 100%;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 99;
+  background-color: #BF211E;
+  display: none;
+  flex-direction: column;
+  text-align: center;
+}
+#mobileMenu a {
+  margin-top: 25px;
+  font-size: 1.2em;
+  color: #FCFCFC;
+}
+#mobileMenu .menuHeader {
+  width: calc(100% - 20px);
+  padding: 0 10px;
+  display: flex;
+  justify-content: space-between;
+}
+#mobileMenu .menuHeader .logo {
+  font-size: 1.7em;
+  font-weight: bold;
+  color: #090809;
+}
+
 header {
   height: 100vh;
   width: 100%;
@@ -66,6 +95,10 @@ header .contentContainer .flagContainer .circle {
 }
 header .contentContainer .flagContainer h1 {
   font-size: 2.5em;
+  text-align: center;
+}
+header .contentContainer .flagContainer h2 {
+  text-align: center;
 }
 header .contentContainer .imgContainer {
   width: 50%;
@@ -125,7 +158,6 @@ main #chef img {
 }
 main #chef .content {
   width: calc(50% - 50px);
-  height: calc(100% - 50px);
   padding: 25px;
   background-color: #BF211E;
 }
@@ -214,5 +246,21 @@ footer p {
   header nav .mobile img {
     height: 30px;
     width: 30px;
+  }
+  main #food {
+    flex-direction: column;
+    height: 750px;
+  }
+  main #food .foodItem {
+    width: 100%;
+    height: 250px;
+  }
+  main #location {
+    height: auto;
+    flex-direction: column;
+  }
+  main #location .footerSection {
+    width: 100%;
+    margin: 15px 0;
   }
 }/*# sourceMappingURL=style.css.map */
