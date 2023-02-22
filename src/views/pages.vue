@@ -17,17 +17,23 @@
 
             <q-card-actions>
                 <q-btn flat round color="negative" icon="delete" />
-                <q-btn flat round color="primary" icon="edit" @click="editPage(pageData.id)" />
+                <q-btn
+                    flat
+                    round
+                    color="primary"
+                    icon="edit"
+                    @click="editPage(pageData.id)"
+                />
             </q-card-actions>
         </q-card>
 
         <q-card
             class="my-card addCard"
-            :class="'bg-' + colors.qgrey + ' ' + 'text-' + colors.qtext" @click="addPage"
+            :class="'bg-' + colors.qgrey + ' ' + 'text-' + colors.qtext"
+            @click="addPage"
         >
             <q-icon name="add_circle" color="primary" size="xl" />
         </q-card>
-        
     </div>
 </template>
 
@@ -93,7 +99,7 @@ function getPages() {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
-            "authorization": settingsStore.token,
+            authorization: settingsStore.token,
         },
     }).then((resp) => {
         resp.json().then((data) => {
@@ -104,13 +110,35 @@ function getPages() {
 
 getPages();
 
-function addPage(){
-    console.log('sd')
-    router.push("/newPage")
+function addPage() {
+    router.push("/newPage");
 }
 
-function editPage(id){
-    window.location.href = "http://localhost:5500/template/edit/" + data.template + "?token=" + settingsStore.token + "&id=" + id
+function editPage(id) {
+    for (let i = 0; i < pages.page.length; i++) {
+        if (pages.page[i].id == id && pages.page[i].url == id) {
+            window.location.href =
+                "http://localhost:5500/template/edit/" +
+                pages.page[i].template +
+                "?token=" +
+                settingsStore.token +
+                "&id=" +
+                pages.page[i].url +
+                "$-$" +
+                pages.page[i].headline +
+                "$-$" +
+                pages.page[i].desc +
+                "&save=true";
+        } else if (pages.page[i].id == id) {
+            window.location.href =
+                "http://localhost:5500/template/edit/" +
+                pages.page[i].template +
+                "?token=" +
+                settingsStore.token +
+                "&id=" +
+                id;
+        }
+    }
 }
 </script>
 

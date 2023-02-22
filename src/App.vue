@@ -53,10 +53,14 @@ function changePages(p) {
 
 if (
     window.matchMedia &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches
+    window.matchMedia("(prefers-color-scheme: dark)").matches && settingsStore.mode == ""
 ) {
     settingsStore.$patch((state) => {
         state.mode = "Dark";
+    });
+}else {
+    settingsStore.$patch((state) => {
+        state.mode = "Light";
     });
 }
 
@@ -85,6 +89,8 @@ let colors = computed(() => {
             qgrey: colorStore.dark.qgrey,
             qcolor: colorStore.dark.qcolor,
             qdarkcolor: colorStore.dark.qdarkColor,
+            backColor: "#1d1d1d",
+            menuColor: "#212121"
         };
     } else if (settingsStore.mode == "Light") {
         return {
@@ -98,6 +104,8 @@ let colors = computed(() => {
             qtext: colorStore.light.qtext,
             qgrey: colorStore.light.qgrey,
             qdarkcolor: colorStore.light.qdarkColor,
+            backColor: "#fafafa",
+            menuColor: "#f5f5f5"
         };
     }
 
@@ -112,6 +120,8 @@ let colors = computed(() => {
         qtext: "dark",
         qcolor: "blue-10",
         qdarkcolor: "dark",
+        backColor: "#1d1d1d",
+        menuColor: "#212121"
     };
 });
 
@@ -157,7 +167,7 @@ function accountMenu(){
 </script>
 
 <template>
-    <div :class="'bg-' + colors.qdarkcolor" class="container">
+    <div class="container">
         <q-layout
             view="lHh lpr lFf"
             container
@@ -209,7 +219,6 @@ function accountMenu(){
                         bordered
                         padding
                         class="text-primary sideMenu"
-                        :class="'bg-' + colors.qgrey"
                     >
                         <div>
                             <q-item
@@ -334,6 +343,7 @@ function accountMenu(){
 <style scoped>
 .container {
     min-height: 100vh;
+    background-color: v-bind("colors.backColor") !important;
 }
 
 .sideMenuPanelBackdrop {
@@ -360,6 +370,7 @@ animation: slideIn 0.6s ease-in-out forwards;
     justify-content: space-between;
     height: 100%;
     flex-shrink: 0;
+    background-color: v-bind("colors.backColor") !important;
 }
 
 .contentContainer {

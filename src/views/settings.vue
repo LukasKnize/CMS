@@ -128,7 +128,7 @@ watch(settingsData, (mode) => {
 
 <style>
 span,
-.q-toggle__label {
+.q-toggle__label, .q-field__control-container>input {
     color: v-bind("colors.text") !important;
 }
 

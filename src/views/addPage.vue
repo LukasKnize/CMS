@@ -60,7 +60,12 @@
                 :class="'text-' + colors.qtext"
             />
 
-            <q-btn label="Submit" type="submit" :color="colors.qbase" @click="createPage" />
+            <q-btn
+                label="Submit"
+                type="submit"
+                :color="colors.qbase"
+                @click="createPage"
+            />
         </q-form>
     </div>
 </template>
@@ -124,7 +129,7 @@ let data = reactive({
     url: "",
     desc: "",
     template: "",
-    save: false
+    save: false,
 });
 let options = reactive({ templates: "" });
 
@@ -146,35 +151,62 @@ fetch("http://localhost:5500/template/all", {
 });
 
 function createPage(e) {
-    e.preventDefault()
+    e.preventDefault();
     if (data.save) {
-      fetch("http://localhost:5500/pages/", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            authorization: settingsStore.token,
-        },
-        body: JSON.stringify(data),
-    }).then((resp) => {
-        resp.json().then((dataresp) => {
-            window.location.href = "http://localhost:5500/template/edit/" + data.template + "?token=" + settingsStore.token + "&id=" + dataresp.id + "&save=false"
+        fetch("http://localhost:5500/pages/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                authorization: settingsStore.token,
+            },
+            body: JSON.stringify(data),
+        }).then((resp) => {
+            resp.json().then((dataresp) => {
+                console.log(dataresp.message);
+                if (dataresp.message == "created") {
+                    window.location.href =
+                        "http://localhost:5500/template/edit/" +
+                        data.template +
+                        "?token=" +
+                        settingsStore.token +
+                        "&id=" +
+                        dataresp.id +
+                        "&save=false";
+                } else {
+                    console.log(dataresp.message);
+                }
+            });
         });
-    });  
-    }else{
+    } else {
         fetch("http://localhost:5500/pages/save", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            authorization: settingsStore.token,
-        },
-        body: JSON.stringify(data),
-    }).then((resp) => {
-        resp.json().then((dataresp) => {
-            window.location.href = "http://localhost:5500/template/edit/" + data.template + "?token=" + settingsStore.token + "&id=" + data.url + "&save=true"
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                authorization: settingsStore.token,
+            },
+            body: JSON.stringify(data),
+        }).then((resp) => {
+            resp.json().then((dataresp) => {
+                console.log(dataresp.message);
+                if (dataresp.message == "created") {
+                    window.location.href =
+                        "http://localhost:5500/template/edit/" +
+                        data.template +
+                        "?token=" +
+                        settingsStore.token +
+                        "&id=" +
+                        data.url +
+                        "$-$" +
+                        data.headline +
+                        "$-$" +
+                        data.desc +
+                        "&save=true";
+                } else {
+                    console.log(dataresp.message);
+                }
+            });
         });
-    }); 
     }
-    
 }
 </script>
 
@@ -196,5 +228,13 @@ function createPage(e) {
 <style>
 input {
     color: v-bind("colors.text") !important;
+}
+
+.q-field__native > span {
+    color: v-bind("colors.text") !important;
+}
+
+.q-item__label > span {
+    color: black;
 }
 </style>

@@ -103,24 +103,32 @@ function addTemplate() {
             },
             body: data,
         }).then((resp) => {
-            console.log(resp);
+            resp.json().then(resp => {
+                if (resp.message == "template has been uploaded") {
+                    loadTemplates()
+                }
+            })
         });
     };
 
     input.click();
 }
 
-fetch("http://localhost:5500/template/all", {
-    method: "GET",
-    headers: {
-        "Content-Type": "application/json",
-        authorization: settingsStore.token,
-    },
-}).then((resp) => {
-    resp.json().then((data) => {
-        templates.templates = data.templates;
+function loadTemplates() {
+    fetch("http://localhost:5500/template/all", {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            authorization: settingsStore.token,
+        },
+    }).then((resp) => {
+        resp.json().then((data) => {
+            templates.templates = data.templates;
+        });
     });
-});
+}
+
+loadTemplates()
 </script>
 
 <style scoped>
