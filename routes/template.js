@@ -119,6 +119,23 @@ router.get("/edit/:param", (req, res) => {
                                         let script = dom.window.document.createElement("script")
                                         script.src = 'http://localhost:8080/editor.js'
                                         dom.window.document.body.appendChild(script)
+                                        let link = dom.window.document.head.getElementsByTagName('link')
+                                        link = [...link]
+                                        link.forEach(l => {
+                                            if (/^(\.\.)|^(\/)|^(\.)|^(?!.*www|http:\/\/|https:\/\/)/.test(l.href)) {
+                                                l.href.replace(/^(\.\.)|^(\.)/, "")
+                                                l.href = "http://localhost:5500/" + filesP[i].name + "/" + l.href
+                                            }
+                                        })
+
+                                        let img = dom.window.document.body.getElementsByTagName('img')
+                                        img = [...img]
+                                        img.forEach(l => {
+                                            if (/^(\.\.)|^(\/)|^(\.)|^(?!.*www|http:\/\/|https:\/\/)/.test(l.src)) {
+                                                l.src.replace(/^(\.\.)|^(\.)/, "")
+                                                l.src = "http://localhost:5500/" + filesP[i].name + "/" + l.src
+                                            }
+                                        })
                                         res.send(dom.serialize())
                                         break
                                     }
